@@ -220,11 +220,16 @@ const FCAForm = () => {
         </motion.div>
 
         <motion.div className="col-span-1 md:col-span-2" variants={itemVariants}>
-          <UploadPhotos
-            photos={formData.photos}
-            onChange={(photos) => handleChange("photos", photos)}
-          />
-        </motion.div>
+    <UploadPhotos
+        photos={formData.photos}
+        onChange={(photos) => handleChange("photos", photos)}
+        onRemove={(index) => {
+            const updatedPhotos = formData.photos.filter((_, i) => i !== index);
+            handleChange("photos", updatedPhotos);
+        }}
+    />
+</motion.div>
+
 
         <motion.div className="col-span-1 md:col-span-2" variants={itemVariants}>
           <Button label="Submit" type="submit" />
