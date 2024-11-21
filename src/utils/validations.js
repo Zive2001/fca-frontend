@@ -9,3 +9,16 @@ export const determineStatus = (defectRate) => {
     return defectRate <= AQL ? "Pass" : "Fail";
 };
 
+// New validation function
+export const validateDefectQuantity = (defectQuantity, inspectedQuantity) => {
+    if (defectQuantity > inspectedQuantity) {
+        throw new Error("Defect quantity cannot exceed inspected quantity.");
+    }
+    if (defectQuantity < 0) {
+        throw new Error("Defect quantity cannot be negative.");
+    }
+    if (inspectedQuantity < 0) {
+        throw new Error("Inspected quantity cannot be negative.");
+    }
+    return true;
+};

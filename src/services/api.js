@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:5000/api/fca";
+const API_URL = "http://localhost:5001/api/fca";
 
 export const fetchPlants = async () => {
     try {
