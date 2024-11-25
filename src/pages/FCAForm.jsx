@@ -5,7 +5,14 @@ import InputField from "../components/InputField";
 import UploadPhotos from "../components/UploadPhotos";
 import Button from "../components/Button";
 import StatusBadge from "../components/StatusBadge";
-import { fetchPlants, fetchPOs, fetchSizes, fetchDefectCategories, fetchDefectCodes, submitFCAData } from "../services/api";
+import {
+  fetchPlants,
+  fetchPOs,
+  fetchSizes,
+  fetchDefectCategories,
+  fetchDefectCodes,
+  submitFCAData,
+} from "../services/api";
 import { calculateDefectRate, determineStatus } from "../utils/validations";
 
 const containerVariants = {
@@ -43,7 +50,13 @@ const FCAForm = () => {
   useEffect(() => {
     const loadData = async () => {
       const plantData = await fetchPlants();
-      setPlants(plantData);
+      setPlants(
+        plantData.map((item) => ({
+          id: item.id, // Use the unique 'id' column for mapping
+          label: item.Sewing_work_center, // Replace 'name' with the plant name column
+          value: item.id,
+        }))
+      );
     };
     loadData();
   }, []);
@@ -52,7 +65,13 @@ const FCAForm = () => {
     if (formData.plant) {
       const loadPOs = async () => {
         const poData = await fetchPOs(formData.plant);
-        setPos(poData);
+        setPos(
+          poData.map((item) => ({
+            id: item.id, // Use the 'id' from the PO data
+            label: item.Sales_order, // Replace with the appropriate PO label column
+            value: item.id,
+          }))
+        );
       };
       loadPOs();
     }
@@ -62,7 +81,13 @@ const FCAForm = () => {
     if (formData.po) {
       const loadSizes = async () => {
         const sizeData = await fetchSizes(formData.po);
-        setSizes(sizeData);
+        setSizes(
+          sizeData.map((item) => ({
+            id: item.id, // Use the 'id' from the size data
+            label: item.Size, // Replace with the appropriate size label column
+            value: item.id,
+          }))
+        );
       };
       loadSizes();
     }
@@ -71,7 +96,12 @@ const FCAForm = () => {
   useEffect(() => {
     const loadDefectCategories = async () => {
       const categoryData = await fetchDefectCategories();
-      setDefectCategories(categoryData);
+      const formattedCategories = categoryData.map((item) => ({
+        id: item.UnqId,
+        label: item.Defect_Category,
+        value: item.UnqId,
+      }));
+      setDefectCategories(formattedCategories);
     };
     loadDefectCategories();
   }, []);
@@ -80,7 +110,12 @@ const FCAForm = () => {
     if (formData.defectCategory) {
       const loadDefectCodes = async () => {
         const codeData = await fetchDefectCodes(formData.defectCategory);
-        setDefectCodes(codeData);
+        const formattedCodes = codeData.map((item) => ({
+          id: item.UnqId,
+          label: item.Defect_code,
+          value: item.Defect_code,
+        }));
+        setDefectCodes(formattedCodes);
       };
       loadDefectCodes();
     }
@@ -149,7 +184,10 @@ const FCAForm = () => {
         <motion.div variants={itemVariants}>
           <Dropdown
             label="Select Shift"
-            options={["A", "B"]}
+            options={[
+              { id: "A", label: "A", value: "A" },
+              { id: "B", label: "B", value: "B" },
+            ]}
             value={formData.shift}
             onChange={(value) => handleChange("shift", value)}
           />
@@ -220,19 +258,14 @@ const FCAForm = () => {
         </motion.div>
 
         <motion.div className="col-span-1 md:col-span-2" variants={itemVariants}>
-    <UploadPhotos
-        photos={formData.photos}
-        onChange={(photos) => handleChange("photos", photos)}
-        onRemove={(index) => {
-            const updatedPhotos = formData.photos.filter((_, i) => i !== index);
-            handleChange("photos", updatedPhotos);
-        }}
-    />
-</motion.div>
+          <UploadPhotos
+            photos={formData.photos}
+            onUpload={(photos) => handleChange("photos", photos)}
+          />
+        </motion.div>
 
-
-        <motion.div className="col-span-1 md:col-span-2" variants={itemVariants}>
-          <Button label="Submit" type="submit" />
+        <motion.div className="col-span-1 md:col-span-2 flex justify-end" variants={itemVariants}>
+          <Button type="submit" label="Submit" />
         </motion.div>
       </form>
     </motion.div>
