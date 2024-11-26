@@ -5,6 +5,7 @@ import InputField from "../components/InputField";
 import UploadPhotos from "../components/UploadPhotos";
 import Button from "../components/Button";
 import StatusBadge from "../components/StatusBadge";
+
 import {
   fetchPlants,
   fetchPOs,
@@ -169,7 +170,14 @@ const FCAForm = () => {
       animate="visible"
       variants={containerVariants}
     >
-      <h1 className="text-2xl font-semibold mb-6">FCA Inline Form</h1>
+     <h1 className="text-2xl font-semibold mb-6 flex items-center">
+        <img
+          src="/inlineicon.svg" // Adjust path based on your project structure
+          alt="Sewing Icon"
+          className="w-6 h-6 mr-2"
+        />
+        FCA Inline Form
+      </h1>
       <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <motion.div variants={itemVariants}>
           <Dropdown
