@@ -5,6 +5,8 @@ import InputField from "../components/InputField";
 import UploadPhotos from "../components/UploadPhotos";
 import Button from "../components/Button";
 import StatusBadge from "../components/StatusBadge";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 import {
   fetchPlants,
@@ -36,7 +38,7 @@ const FCAForm = () => {
   const [defectCodes, setDefectCodes] = useState([]);
   const [formData, setFormData] = useState({
     plant: "",
-    module:"",
+    module: "",
     shift: "A",
     po: "",
     size: "",
@@ -65,7 +67,6 @@ const FCAForm = () => {
     loadData();
   }, []);
 
-//changes ive done
   useEffect(() => {
     if (formData.plant) {
       const loadModules = async () => {
@@ -82,8 +83,6 @@ const FCAForm = () => {
     }
   }, [formData.plant]);
 
-
-
   useEffect(() => {
     if (formData.module) {
       const loadPOs = async () => {
@@ -99,9 +98,6 @@ const FCAForm = () => {
       loadPOs();
     }
   }, [formData.module]);
-
-
-  //end of the changes
 
   useEffect(() => {
     if (formData.po) {
@@ -181,156 +177,150 @@ const FCAForm = () => {
 
     if (Object.keys(formErrors).length > 0) {
       setErrors(formErrors);
+
+      // Show toast notifications for each error
+      Object.values(formErrors).forEach((error) => {
+        toast.error(error);
+      });
+
       return;
     }
 
     try {
       await submitFCAData(formData);
-      alert("Form submitted successfully!");
+      toast.success("Form submitted successfully!");
     } catch (error) {
       console.error("Error submitting form:", error);
-      alert("There was an error submitting the form.");
+      toast.error("There was an error submitting the form.");
     }
   };
 
   return (
     <motion.div
-    className="container mx-auto p-6"
-    initial="hidden"
-    animate="visible"
-    variants={containerVariants}
-  >
-    <h1 className="text-2xl font-semibold mb-6 flex items-center">
-      <img
-        src="/inlineicon2.svg"
-        alt="Sewing Icon"
-        className="w-6 h-6 mr-2"
-      />
-      FCA Inline Form
-    </h1>
-    <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      {/* Left side fields */}
-      <div className="flex flex-col gap-6">
-        <motion.div variants={itemVariants}>
-          <Dropdown
-            label="Select Plant"
-            options={plants}
-            value={formData.plant}
-            onChange={(value) => handleChange("plant", value)}
-            error={errors.plant}
+      className="container mx-auto p-6"
+      initial="hidden"
+      animate="visible"
+      variants={containerVariants}
+    >
+      <h1 className="text-2xl font-semibold mb-6 flex items-center">
+        <img src="/inlineicon2.svg" alt="Sewing Icon" className="w-6 h-6 mr-2" />
+        FCA Inline Form
+      </h1>
+      <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Left side fields */}
+        <div className="flex flex-col gap-6">
+          <motion.div variants={itemVariants}>
+            <Dropdown
+              label="Select Plant"
+              options={plants}
+              value={formData.plant}
+              onChange={(value) => handleChange("plant", value)}
+              error={errors.plant}
+            />
+          </motion.div>
+          <motion.div variants={itemVariants}>
+            <Dropdown
+              label="Select Module"
+              options={modules}
+              value={formData.module}
+              onChange={(value) => handleChange("module", value)}
+              error={errors.module}
+            />
+          </motion.div>
+          <motion.div variants={itemVariants}>
+            <Dropdown
+              label="Select Shift"
+              options={[
+                { id: "A", label: "A", value: "A" },
+                { id: "B", label: "B", value: "B" },
+              ]}
+              value={formData.shift}
+              onChange={(value) => handleChange("shift", value)}
+            />
+          </motion.div>
+          <motion.div variants={itemVariants}>
+            <Dropdown
+              label="Select PO"
+              options={pos}
+              value={formData.po}
+              onChange={(value) => handleChange("po", value)}
+              error={errors.po}
+            />
+          </motion.div>
+          <motion.div variants={itemVariants}>
+            <Dropdown
+              label="Select Size"
+              options={sizes}
+              value={formData.size}
+              onChange={(value) => handleChange("size", value)}
+              error={errors.size}
+            />
+          </motion.div>
+        </div>
+
+        {/* Right side fields */}
+        <div className="flex flex-col gap-6">
+          <motion.div variants={itemVariants}>
+            <InputField
+              label="Inspected Quantity"
+              type="number"
+              value={formData.inspectedQuantity}
+              onChange={(value) => handleChange("inspectedQuantity", value)}
+              error={errors.inspectedQuantity}
+            />
+          </motion.div>
+          <motion.div variants={itemVariants}>
+            <InputField
+              label="Defect Quantity"
+              type="number"
+              value={formData.defectQuantity}
+              onChange={(value) => handleChange("defectQuantity", value)}
+              error={errors.defectQuantity}
+            />
+          </motion.div>
+          <motion.div variants={itemVariants}>
+            <Dropdown
+              label="Defect Category"
+              options={defectCategories}
+              value={formData.defectCategory}
+              onChange={(value) => handleChange("defectCategory", value)}
+              error={errors.defectCategory}
+            />
+          </motion.div>
+          <motion.div variants={itemVariants}>
+            <Dropdown
+              label="Defect Code"
+              options={defectCodes}
+              value={formData.defectCode}
+              onChange={(value) => handleChange("defectCode", value)}
+              error={errors.defectCode}
+            />
+          </motion.div>
+          <motion.div variants={itemVariants}>
+            <UploadPhotos
+              label="Upload Photos"
+              photos={formData.photos}
+              onChange={(photos) => handleChange("photos", photos)}
+            />
+          </motion.div>
+  
+        </div>
+        
+ {/* Status Badge */}
+ <div className="col-span-full flex flex-col items-baseline gap-8">
+          <StatusBadge 
+            defectRate={formData.defectRate} 
+            status={formData.status} 
           />
-        </motion.div>
+        </div>
 
-        <motion.div variants={itemVariants}>
-          <Dropdown
-            label="Select Module"
-            options={modules}
-            value={formData.module}
-            onChange={(value) => handleChange("module", value)}
-            error={errors.module}
-          />
-        </motion.div>
-
-        <motion.div variants={itemVariants}>
-          <Dropdown
-            label="Select Shift"
-            options={[
-              { id: "A", label: "A", value: "A" },
-              { id: "B", label: "B", value: "B" },
-            ]}
-            value={formData.shift}
-            onChange={(value) => handleChange("shift", value)}
-          />
-        </motion.div>
-
-        <motion.div variants={itemVariants}>
-          <Dropdown
-            label="Select PO"
-            options={pos}
-            value={formData.po}
-            onChange={(value) => handleChange("po", value)}
-            error={errors.po}
-          />
-        </motion.div>
-
-        <motion.div variants={itemVariants}>
-          <Dropdown
-            label="Select Size"
-            options={sizes}
-            value={formData.size}
-            onChange={(value) => handleChange("size", value)}
-            error={errors.size}
-          />
-        </motion.div>
-      </div>
-
-      {/* Right side fields */}
-      <div className="flex flex-col gap-6">
-        <motion.div variants={itemVariants}>
-          <InputField
-            label="Inspected Quantity"
-            type="number"
-            value={formData.inspectedQuantity}
-            onChange={(value) => handleChange("inspectedQuantity", value)}
-            error={errors.inspectedQuantity}
-          />
-        </motion.div>
-
-        <motion.div variants={itemVariants}>
-          <InputField
-            label="Defect Quantity"
-            type="number"
-            value={formData.defectQuantity}
-            onChange={(value) => handleChange("defectQuantity", value)}
-            error={errors.defectQuantity}
-          />
-        </motion.div>
-
-        <motion.div variants={itemVariants}>
-          <Dropdown
-            label="Defect Category"
-            options={defectCategories}
-            value={formData.defectCategory}
-            onChange={(value) => handleChange("defectCategory", value)}
-            error={errors.defectCategory}
-          />
-        </motion.div>
-
-        <motion.div variants={itemVariants}>
-          <Dropdown
-            label="Defect Code"
-            options={defectCodes}
-            value={formData.defectCode}
-            onChange={(value) => handleChange("defectCode", value)}
-            error={errors.defectCode}
-          />
-        </motion.div>
-      </div>
-
-      {/* Status Badge */}
-      <motion.div className="col-span-1 md:col-span-2" variants={itemVariants}>
-        <StatusBadge status={formData.status} defectRate={formData.defectRate} />
-      </motion.div>
-
-      {/* Upload Photos */}
-      <motion.div className="col-span-1 md:col-span-2" variants={itemVariants}>
-        <UploadPhotos
-          label="Upload Photos"
-          photos={formData.photos}
-          onUpload={(photos) => handleChange("photos", photos)}
-        />
-      </motion.div>
-
-      {/* Submit Button */}
-      <motion.div
-        className="col-span-1 md:col-span-2 flex justify-end"
-        variants={itemVariants}
-      >
-        <Button label="Submit" type="submit" />
-      </motion.div>
-    </form>
-  </motion.div>
-);
+        {/* Submit Button */}
+        <div className="col-span-full flex justify-end mt-4">
+          <Button type="submit" variant="primary" label="Submit Form" />
+        </div>
+      </form>
+    </motion.div>
+  );
 };
 
-export default FCAForm;
+export default FCAForm
