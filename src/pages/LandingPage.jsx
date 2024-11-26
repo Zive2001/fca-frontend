@@ -19,12 +19,12 @@ const LandingPage = () => {
             </li>
             <li>
               <Link to="/about" className="hover:text-blue-500">
-                About
+                Add Data
               </Link>
             </li>
             <li>
               <Link to="/contact" className="hover:text-blue-500">
-                Contact
+                View Audits
               </Link>
             </li>
           </ul>
@@ -42,7 +42,7 @@ const LandingPage = () => {
           Welcome to <span className="text-blue-500">FCA App</span>
         </motion.h1>
         <p className="text-lg text-gray-400 mb-10">
-          Revolutionizing audits with seamless technology.
+          Factory Certified Audits platform. Click on get started for the guide.
         </p>
         <Link
           to="/get-started"
@@ -67,7 +67,7 @@ const LandingPage = () => {
           <Link to="/fca-inline" className="block">
             <div className="h-40 bg-gray-700 flex items-center justify-center">
               <img
-                src="./chrts.svg" // Add your image here
+                src="./chrts.svg" 
                 alt="FCA Inline"
                 className="h-full object-cover"
               />
@@ -76,7 +76,7 @@ const LandingPage = () => {
               <h2 className="text-xl font-semibold mb-2 text-blue-400">
                 FCA Inline
               </h2>
-              <p className="text-gray-400">Start inline audits seamlessly.</p>
+              <p className="text-gray-400">Inline Audit Form</p>
             </div>
           </Link>
         </motion.div>
@@ -89,7 +89,7 @@ const LandingPage = () => {
           <Link to="/fca-endline" className="block">
             <div className="h-40 bg-gray-700 flex items-center justify-center">
               <img
-                src="./your-image-2.jpg" // Add your image here
+                src="./pics.svg" 
                 alt="FCA Endline"
                 className="h-full object-cover"
               />
@@ -98,7 +98,7 @@ const LandingPage = () => {
               <h2 className="text-xl font-semibold mb-2 text-blue-400">
                 FCA Endline
               </h2>
-              <p className="text-gray-400">Perform endline audits effortlessly.</p>
+              <p className="text-gray-400">Endline Audit Form</p>
             </div>
           </Link>
         </motion.div>
@@ -111,7 +111,7 @@ const LandingPage = () => {
           <Link to="/final-audit" className="block">
             <div className="h-40 bg-gray-700 flex items-center justify-center">
               <img
-                src="./your-image-3.jpg" // Add your image here
+                src="./mgr.svg" 
                 alt="Final Audit"
                 className="h-full object-cover"
               />
