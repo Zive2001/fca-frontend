@@ -53,8 +53,8 @@ const FCAForm = () => {
       const plantData = await fetchPlants();
       setPlants(
         plantData.map((item) => ({
-          id: item.id, // Use the unique 'id' column for mapping
-          label: item.Sewing_work_center, // Replace 'name' with the plant name column
+          id: item.id,
+          label: item.Production_Section,
           value: item.id,
         }))
       );
@@ -68,8 +68,8 @@ const FCAForm = () => {
         const poData = await fetchPOs(formData.plant);
         setPos(
           poData.map((item) => ({
-            id: item.id, // Use the 'id' from the PO data
-            label: item.Sales_order, // Replace with the appropriate PO label column
+            id: item.id,
+            label: item.Sewing_Order,
             value: item.id,
           }))
         );
@@ -84,8 +84,8 @@ const FCAForm = () => {
         const sizeData = await fetchSizes(formData.po);
         setSizes(
           sizeData.map((item) => ({
-            id: item.id, // Use the 'id' from the size data
-            label: item.Size, // Replace with the appropriate size label column
+            id: item.id,
+            label: item.Size,
             value: item.id,
           }))
         );
@@ -113,8 +113,8 @@ const FCAForm = () => {
         const codeData = await fetchDefectCodes(formData.defectCategory);
         const formattedCodes = codeData.map((item) => ({
           id: item.UnqId,
-          label: item.Defect_code,
-          value: item.Defect_code,
+          label: item.Defect_Code,
+          value: item.Defect_Code,
         }));
         setDefectCodes(formattedCodes);
       };
@@ -126,7 +126,6 @@ const FCAForm = () => {
     setFormData((prevData) => {
       const updatedData = { ...prevData, [field]: value };
 
-      // Calculate defect rate and status based on the updated data
       if (field === "defectQuantity" || field === "inspectedQuantity") {
         const defectRate = calculateDefectRate(updatedData.defectQuantity, updatedData.inspectedQuantity);
         updatedData.defectRate = defectRate;
@@ -141,13 +140,19 @@ const FCAForm = () => {
 
     // Form validation
     let formErrors = {};
-    if (!formData.plant) formErrors.plant = "Plant is required";
-    if (!formData.po) formErrors.po = "PO is required";
-    if (!formData.size) formErrors.size = "Size is required";
-    if (!formData.inspectedQuantity) formErrors.inspectedQuantity = "Inspected Quantity is required";
-    if (!formData.defectQuantity) formErrors.defectQuantity = "Defect Quantity is required";
-    if (!formData.defectCategory) formErrors.defectCategory = "Defect Category is required";
-    if (!formData.defectCode) formErrors.defectCode = "Defect Code is required";
+    const inspectedQuantity = Number(formData.inspectedQuantity);
+    const defectQuantity = Number(formData.defectQuantity);
+
+    if (!formData.plant) formErrors.plant = "Plant is required.";
+    if (!formData.po) formErrors.po = "PO is required.";
+    if (!formData.size) formErrors.size = "Size is required.";
+    if (!formData.inspectedQuantity) formErrors.inspectedQuantity = "Inspected Quantity is required.";
+    if (!formData.defectQuantity) formErrors.defectQuantity = "Defect Quantity is required.";
+    if (!formData.defectCategory) formErrors.defectCategory = "Defect Category is required.";
+    if (!formData.defectCode) formErrors.defectCode = "Defect Code is required.";
+    if (defectQuantity > inspectedQuantity) formErrors.defectQuantity = "Defect quantity cannot exceed inspected quantity.";
+    if (defectQuantity < 0) formErrors.defectQuantity = "Defect quantity cannot be negative.";
+    if (inspectedQuantity < 0) formErrors.inspectedQuantity = "Inspected quantity cannot be negative.";
 
     if (Object.keys(formErrors).length > 0) {
       setErrors(formErrors);
@@ -170,9 +175,9 @@ const FCAForm = () => {
       animate="visible"
       variants={containerVariants}
     >
-     <h1 className="text-2xl font-semibold mb-6 flex items-center">
+      <h1 className="text-2xl font-semibold mb-6 flex items-center">
         <img
-          src="/inlineicon.svg" // Adjust path based on your project structure
+          src="/inlineicon.svg"
           alt="Sewing Icon"
           className="w-6 h-6 mr-2"
         />
@@ -267,13 +272,14 @@ const FCAForm = () => {
 
         <motion.div className="col-span-1 md:col-span-2" variants={itemVariants}>
           <UploadPhotos
+            label="Upload Photos"
             photos={formData.photos}
             onUpload={(photos) => handleChange("photos", photos)}
           />
         </motion.div>
 
         <motion.div className="col-span-1 md:col-span-2 flex justify-end" variants={itemVariants}>
-          <Button type="submit" label="Submit" />
+          <Button label="Submit" type="submit" />
         </motion.div>
       </form>
     </motion.div>
