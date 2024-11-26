@@ -7,9 +7,11 @@ const LandingPage = () => {
     <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 text-white">
       {/* Navbar */}
       <header className="flex items-center justify-between px-8 py-4 bg-gray-800 bg-opacity-80">
-        <h1 className="text-2xl font-bold tracking-wide">
-          <span className="text-blue-500">FCA</span> App
-        </h1>
+      <img 
+    src="/fcalogo.svg" 
+    alt="FCA App Logo" 
+    className="h-full max-h-12" 
+  />
         <nav>
           <ul className="flex space-x-6">
             <li>

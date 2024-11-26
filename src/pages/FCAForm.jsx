@@ -8,6 +8,7 @@ import StatusBadge from "../components/StatusBadge";
 
 import {
   fetchPlants,
+  fetchModules,
   fetchPOs,
   fetchSizes,
   fetchDefectCategories,
@@ -28,12 +29,14 @@ const itemVariants = {
 
 const FCAForm = () => {
   const [plants, setPlants] = useState([]);
+  const [modules, setModules] = useState([]);
   const [pos, setPos] = useState([]);
   const [sizes, setSizes] = useState([]);
   const [defectCategories, setDefectCategories] = useState([]);
   const [defectCodes, setDefectCodes] = useState([]);
   const [formData, setFormData] = useState({
     plant: "",
+    module:"",
     shift: "A",
     po: "",
     size: "",
@@ -62,10 +65,29 @@ const FCAForm = () => {
     loadData();
   }, []);
 
+//changes ive done
   useEffect(() => {
     if (formData.plant) {
+      const loadModules = async () => {
+        const poData = await fetchModules(formData.plant);
+        setModules(
+          poData.map((item) => ({
+            id: item.id,
+            label: item.Sewing_work_center,
+            value: item.id,
+          }))
+        );
+      };
+      loadModules();
+    }
+  }, [formData.plant]);
+
+
+
+  useEffect(() => {
+    if (formData.module) {
       const loadPOs = async () => {
-        const poData = await fetchPOs(formData.plant);
+        const poData = await fetchPOs(formData.module);
         setPos(
           poData.map((item) => ({
             id: item.id,
@@ -76,7 +98,10 @@ const FCAForm = () => {
       };
       loadPOs();
     }
-  }, [formData.plant]);
+  }, [formData.module]);
+
+
+  //end of the changes
 
   useEffect(() => {
     if (formData.po) {
@@ -170,20 +195,22 @@ const FCAForm = () => {
 
   return (
     <motion.div
-      className="container mx-auto p-6"
-      initial="hidden"
-      animate="visible"
-      variants={containerVariants}
-    >
-      <h1 className="text-2xl font-semibold mb-6 flex items-center">
-        <img
-          src="/inlineicon.svg"
-          alt="Sewing Icon"
-          className="w-6 h-6 mr-2"
-        />
-        FCA Inline Form
-      </h1>
-      <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    className="container mx-auto p-6"
+    initial="hidden"
+    animate="visible"
+    variants={containerVariants}
+  >
+    <h1 className="text-2xl font-semibold mb-6 flex items-center">
+      <img
+        src="/inlineicon2.svg"
+        alt="Sewing Icon"
+        className="w-6 h-6 mr-2"
+      />
+      FCA Inline Form
+    </h1>
+    <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {/* Left side fields */}
+      <div className="flex flex-col gap-6">
         <motion.div variants={itemVariants}>
           <Dropdown
             label="Select Plant"
@@ -191,6 +218,16 @@ const FCAForm = () => {
             value={formData.plant}
             onChange={(value) => handleChange("plant", value)}
             error={errors.plant}
+          />
+        </motion.div>
+
+        <motion.div variants={itemVariants}>
+          <Dropdown
+            label="Select Module"
+            options={modules}
+            value={formData.module}
+            onChange={(value) => handleChange("module", value)}
+            error={errors.module}
           />
         </motion.div>
 
@@ -225,7 +262,10 @@ const FCAForm = () => {
             error={errors.size}
           />
         </motion.div>
+      </div>
 
+      {/* Right side fields */}
+      <div className="flex flex-col gap-6">
         <motion.div variants={itemVariants}>
           <InputField
             label="Inspected Quantity"
@@ -265,25 +305,32 @@ const FCAForm = () => {
             error={errors.defectCode}
           />
         </motion.div>
+      </div>
 
-        <motion.div className="col-span-1 md:col-span-2" variants={itemVariants}>
-          <StatusBadge status={formData.status} defectRate={formData.defectRate} />
-        </motion.div>
+      {/* Status Badge */}
+      <motion.div className="col-span-1 md:col-span-2" variants={itemVariants}>
+        <StatusBadge status={formData.status} defectRate={formData.defectRate} />
+      </motion.div>
 
-        <motion.div className="col-span-1 md:col-span-2" variants={itemVariants}>
-          <UploadPhotos
-            label="Upload Photos"
-            photos={formData.photos}
-            onUpload={(photos) => handleChange("photos", photos)}
-          />
-        </motion.div>
+      {/* Upload Photos */}
+      <motion.div className="col-span-1 md:col-span-2" variants={itemVariants}>
+        <UploadPhotos
+          label="Upload Photos"
+          photos={formData.photos}
+          onUpload={(photos) => handleChange("photos", photos)}
+        />
+      </motion.div>
 
-        <motion.div className="col-span-1 md:col-span-2 flex justify-end" variants={itemVariants}>
-          <Button label="Submit" type="submit" />
-        </motion.div>
-      </form>
-    </motion.div>
-  );
+      {/* Submit Button */}
+      <motion.div
+        className="col-span-1 md:col-span-2 flex justify-end"
+        variants={itemVariants}
+      >
+        <Button label="Submit" type="submit" />
+      </motion.div>
+    </form>
+  </motion.div>
+);
 };
 
 export default FCAForm;

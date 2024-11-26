@@ -12,12 +12,23 @@ export const fetchPlants = async () => {
     }
 };
 
-export const fetchPOs = async (plant) => {
+export const fetchModules = async (plant) => {
     try {
-        const response = await axios.get(`${API_URL}/pos/${plant}`);
+        const response = await axios.get(`${API_URL}/modules/${plant}`);
         return response.data;
     } catch (error) {
         console.error(`Error fetching PO for ${plant}:`, error);
+        return [];
+    }
+};
+
+
+export const fetchPOs = async (module) => {
+    try {
+        const response = await axios.get(`${API_URL}/pos/${module}`);
+        return response.data;
+    } catch (error) {
+        console.error(`Error fetching PO for ${module}:`, error);
         return [];
     }
 };
