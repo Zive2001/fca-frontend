@@ -195,6 +195,26 @@ const FCAForm = () => {
     try {
       await submitFCAData(formData);
       toast.success("Form submitted successfully!");
+      
+      //Clear Data after submit
+      setFormData({
+        plant: "",
+        module: "",
+        shift: "A",
+        po: "",
+        size: "",
+        inspectedQuantity: "",
+        defectQuantity: "",
+        defectCategory: "",
+        defectCode: "",
+        remarks: "",
+        photos: [],
+        status: "",
+        defectRate: 0,
+      });
+  
+      // Clear errors
+      setErrors({});
     } catch (error) {
       console.error("Error submitting form:", error);
       toast.error("There was an error submitting the form.");
