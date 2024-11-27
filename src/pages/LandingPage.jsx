@@ -20,12 +20,12 @@ const LandingPage = () => {
               </Link>
             </li>
             <li>
-              <Link to="/about" className="hover:text-blue-500">
+              <Link to="/add-Data" className="hover:text-blue-500">
                 Add Data
               </Link>
             </li>
             <li>
-              <Link to="/contact" className="hover:text-blue-500">
+              <Link to="/view-audits" className="hover:text-blue-500">
                 View Audits
               </Link>
             </li>

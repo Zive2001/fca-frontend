@@ -22,7 +22,6 @@ export const fetchModules = async (plant) => {
     }
 };
 
-
 export const fetchPOs = async (module) => {
     try {
         const response = await axios.get(`${API_URL}/pos/${module}`);
@@ -71,4 +70,32 @@ export const submitFCAData = async (data) => {
         console.error("Error submitting FCA data:", error);
         throw error;
     }
+};
+
+// Fetch data with filters
+export const getFCAData = async (filters) => {
+    const { type, date, plant, module, status, page, limit } = filters;
+    const params = {
+        type,
+        date,
+        plant,
+        module,
+        status,
+        page,
+        limit,
+    };
+    const response = await axios.get(`${API_URL}/data`, { params });
+    return response.data;
+};
+
+// Update FCA record
+export const updateFCAData = async (id, data) => {
+    const response = await axios.put(`${API_URL}/data/${id}`, data);
+    return response.data;
+};
+
+// Delete FCA record
+export const deleteFCAData = async (id) => {
+    const response = await axios.delete(`${API_URL}/data/${id}`);
+    return response.data;
 };
