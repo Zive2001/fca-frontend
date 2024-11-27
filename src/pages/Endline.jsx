@@ -30,7 +30,7 @@ const itemVariants = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.3 } },
 };
 
-const FCAForm = () => {
+const FCAEndline = () => {
   const [plants, setPlants] = useState([]);
   const [modules, setModules] = useState([]);
   const [pos, setPos] = useState([]);
@@ -51,7 +51,7 @@ const FCAForm = () => {
     photos: [],
     status: "",
     defectRate: 0,
-    type: "Inline",
+    type: "Endline",
   });
   const [errors, setErrors] = useState({});
 
@@ -196,7 +196,7 @@ const FCAForm = () => {
     try {
       await submitFCAData(formData);
       toast.success("Form submitted successfully!");
-
+      
       //Clear Data after submit
       setFormData({
         plant: "",
@@ -212,7 +212,7 @@ const FCAForm = () => {
         photos: [],
         status: "",
         defectRate: 0,
-        type: "Inline",
+        type: "Endline",
       });
   
       // Clear errors
@@ -231,8 +231,8 @@ const FCAForm = () => {
       variants={containerVariants}
     >
       <h1 className="text-2xl font-semibold mb-6 flex items-center">
-        <img src="/inlineicon2.svg" alt="Sewing Icon" className="w-6 h-6 mr-2" />
-        FCA Inline Form
+        <img src="/endline.svg" alt="Sewing Icon" className="w-6 h-6 mr-2" />
+        FCA Endline Form
       </h1>
       <p className="text-sm text-gray-600 font-semibold mb-6 translate-x-8 -translate-y-5">
       <CurrDate />
@@ -363,15 +363,14 @@ const FCAForm = () => {
             status={formData.status} 
           />
         </div>
-       
+
         {/* Submit Button */}
         <div className="col-span-full flex justify-end mt-4">
           <Button type="submit" variant="primary" label="Submit" />
         </div>
       </form>
     </motion.div>
-    
   );
 };
 
-export default FCAForm
+export default FCAEndline
