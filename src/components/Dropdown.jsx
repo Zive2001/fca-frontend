@@ -7,7 +7,7 @@ const Dropdown = ({ label, options, value, onChange, error }) => {
       <select
         className={`block w-full px-4 py-2 border ${
           error ? "border-red-500" : "border-gray-300"
-        } rounded-md shadow-sm focus:outline-none focus:ring focus:border-blue-500`}
+        } rounded-md shadow-sm focus:outline-none focus:ring focus:border-[#023047]`}
         value={value}
         onChange={(e) => onChange(e.target.value)}
       >

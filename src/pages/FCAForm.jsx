@@ -47,6 +47,7 @@ const FCAForm = () => {
     defectQuantity: "",
     defectCategory: "",
     defectCode: "",
+    remarks:"",
     photos: [],
     status: "",
     defectRate: 0,
@@ -167,6 +168,7 @@ const FCAForm = () => {
     let formErrors = {};
     const inspectedQuantity = Number(formData.inspectedQuantity);
     const defectQuantity = Number(formData.defectQuantity);
+    
 
     if (!formData.plant) formErrors.plant = "Plant is required.";
     if (!formData.po) formErrors.po = "PO is required.";
@@ -286,6 +288,7 @@ const FCAForm = () => {
               error={errors.defectQuantity}
             />
           </motion.div>
+
           <motion.div variants={itemVariants}>
             <Dropdown
               label="Defect Category"
@@ -304,11 +307,28 @@ const FCAForm = () => {
               error={errors.defectCode}
             />
           </motion.div>
+
+          <div className="col-span-full flex flex-col items-baseline gap-8">
+          <StatusBadge 
+            defectRate={formData.defectRate} 
+            status={formData.status} 
+          />
+        </div>
+
           <motion.div variants={itemVariants}>
             <UploadPhotos
               label="Upload Photos"
               photos={formData.photos}
               onChange={(photos) => handleChange("photos", photos)}
+            />
+          </motion.div>
+          <motion.div variants={itemVariants}>
+            <InputField
+              label="Remarks"
+              type="textarea"
+              value={formData.remarks}
+              onChange={(value) => handleChange("remarks", value)}
+              error={errors.remarks}
             />
           </motion.div>
   
@@ -324,7 +344,7 @@ const FCAForm = () => {
 
         {/* Submit Button */}
         <div className="col-span-full flex justify-end mt-4">
-          <Button type="submit" variant="primary" label="Submit Form" />
+          <Button type="submit" variant="primary" label="Submit" />
         </div>
       </form>
     </motion.div>
