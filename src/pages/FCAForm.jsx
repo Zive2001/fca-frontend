@@ -7,6 +7,7 @@ import Button from "../components/Button";
 import StatusBadge from "../components/StatusBadge";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import CurrDate from '../components/CurrDate';
 
 import {
   fetchPlants,
@@ -51,6 +52,9 @@ const FCAForm = () => {
     defectRate: 0,
   });
   const [errors, setErrors] = useState({});
+
+
+  
 
   // Fetching data for dropdowns
   useEffect(() => {
@@ -206,6 +210,9 @@ const FCAForm = () => {
         <img src="/inlineicon2.svg" alt="Sewing Icon" className="w-6 h-6 mr-2" />
         FCA Inline Form
       </h1>
+      <p className="text-sm text-gray-600 font-semibold mb-6 translate-x-8 -translate-y-5">
+      <CurrDate />
+    </p>
       <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Left side fields */}
         <div className="flex flex-col gap-6">
@@ -260,6 +267,7 @@ const FCAForm = () => {
 
         {/* Right side fields */}
         <div className="flex flex-col gap-6">
+        
           <motion.div variants={itemVariants}>
             <InputField
               label="Inspected Quantity"
