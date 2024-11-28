@@ -2,9 +2,16 @@ import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { HomeIcon, PlusIcon, EyeIcon } from "@heroicons/react/24/outline";
 import { ChevronRightIcon, ChevronLeftIcon } from "@heroicons/react/24/outline";
+import { useLocation } from "react-router-dom";
 
 const FloatingMenu = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const location = useLocation(); // Get the current route
+
+  // Conditionally hide menu on landing page
+  if (location.pathname === "/") {
+    return null;
+  }
 
   const toggleMenu = () => setIsOpen(!isOpen);
 
@@ -42,32 +49,33 @@ const FloatingMenu = () => {
         {/* Toggle Button */}
         <motion.button
           onClick={toggleMenu}
-          className="bg-transparent p-2 rounded-full hover:bg-white/20 focus:outline-none"
+          className="bg-transparent p-2 rounded-full hover:bg-[#219ebc] focus:outline-none"
         >
           {isOpen ? (
-            <ChevronLeftIcon className="h-5 w-5 text-gray-300" />
-          ) : (
             <ChevronRightIcon className="h-5 w-5 text-gray-300" />
+          ) : (
+            <ChevronLeftIcon className="h-5 w-5 text-gray-300" />
           )}
         </motion.button>
 
         {/* Navigation Items */}
-        {navItems.map((item, index) => (
-          <motion.a
-            key={index}
-            href={item.path}
-            className="flex items-center space-x-2 px-3 py-2 text-sm text-gray-300 hover:text-white rounded-full transition-all"
-            style={{
-              backgroundColor: "rgba(255, 255, 255, 0.05)", // Subtle background for items
-            }}
-            initial="closed"
-            animate={isOpen ? "open" : "closed"}
-            variants={navItemVariants}
-          >
-            <span>{item.icon}</span>
-            {isOpen && <span className="font-medium">{item.name}</span>}
-          </motion.a>
-        ))}
+        {isOpen &&
+          navItems.map((item, index) => (
+            <motion.a
+              key={index}
+              href={item.path}
+              className="flex items-center space-x-2 px-3 py-2 text-sm text-[#023047] hover:text-[#219ebc] rounded-full transition-all"
+              style={{
+                backgroundColor: "rgba(255, 255, 255, 0.05)", // Subtle background for items
+              }}
+              initial="closed"
+              animate={isOpen ? "open" : "closed"}
+              variants={navItemVariants}
+            >
+              <span>{item.icon}</span>
+              {isOpen && <span className="font-medium">{item.name}</span>}
+            </motion.a>
+          ))}
       </motion.div>
     </div>
   );

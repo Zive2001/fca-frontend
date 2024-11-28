@@ -12,7 +12,7 @@ import "./index.css"; // Global CSS
 const App = () => {
   return (
     <Router>
-      <div className="relative min-h-screen bg-gray-100">
+      
         {/* ToastContainer for notifications */}
         <ToastContainer position="top-right" autoClose={3000} />
 
@@ -35,7 +35,7 @@ const App = () => {
 
           {/* Additional routes can be added here */}
         </Routes>
-      </div>
+      
     </Router>
   );
 };
