@@ -29,7 +29,7 @@ const FloatingMenu = () => {
     { name: "Home", icon: <HomeIcon className="h-5 w-5" />, path: "/" },
     { name: "FCA-Inline", icon: <EyeIcon className="h-5 w-5" />, path: "/fca-inline" },
     { name: "FCA-Endline", icon: <EyeIcon className="h-5 w-5" />, path: "/fca-endline" },
-    { name: "View Page", icon: <EyeIcon className="h-5 w-5" />, path: "/view" },
+    { name: "View Page", icon: <EyeIcon className="h-5 w-5" />, path: "/view-audits" },
     { name: "Add Data Page", icon: <PlusIcon className="h-5 w-5" />, path: "/add-data" },
   ];
 
@@ -49,7 +49,7 @@ const FloatingMenu = () => {
         {/* Toggle Button */}
         <motion.button
           onClick={toggleMenu}
-          className="bg-transparent p-2 rounded-full hover:bg-[#219ebc] focus:outline-none"
+          className="bg-transparent p-2 rounded-full hover:bg-[#023047] focus:outline-none"
         >
           {isOpen ? (
             <ChevronRightIcon className="h-5 w-5 text-gray-300" />
