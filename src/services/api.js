@@ -74,13 +74,15 @@ export const submitFCAData = async (data) => {
 
 // Fetch data with filters
 export const getFCAData = async (filters) => {
-    const { type, date, plant, module, status, page, limit } = filters;
+    const { plant, module, shift, po, size, status, date, page, limit } = filters;
     const params = {
-        type,
-        date,
         plant,
         module,
+        shift,
+        po,
+        size,
         status,
+        date,
         page,
         limit,
     };
@@ -88,13 +90,13 @@ export const getFCAData = async (filters) => {
     return response.data;
 };
 
-// Update FCA record
-export const updateFCAData = async (id, data) => {
-    const response = await axios.put(`${API_URL}/data/${id}`, data);
+// Update FCA data
+export const updateFCAData = async (id, updatedData) => {
+    const response = await axios.put(`${API_URL}/data/${id}`, updatedData);
     return response.data;
 };
 
-// Delete FCA record
+// Delete FCA data
 export const deleteFCAData = async (id) => {
     const response = await axios.delete(`${API_URL}/data/${id}`);
     return response.data;
