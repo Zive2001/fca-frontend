@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { HomeIcon, PlusIcon, EyeIcon } from "@heroicons/react/24/outline";
+import { HomeIcon, PlusIcon, EyeIcon,DocumentArrowUpIcon,ClipboardIcon,ClipboardDocumentCheckIcon } from "@heroicons/react/24/outline";
 import { ChevronRightIcon, ChevronLeftIcon } from "@heroicons/react/24/outline";
 import { useLocation } from "react-router-dom";
 
@@ -27,8 +27,8 @@ const FloatingMenu = () => {
 
   const navItems = [
     { name: "Home", icon: <HomeIcon className="h-5 w-5" />, path: "/" },
-    { name: "FCA-Inline", icon: <EyeIcon className="h-5 w-5" />, path: "/fca-inline" },
-    { name: "FCA-Endline", icon: <EyeIcon className="h-5 w-5" />, path: "/fca-endline" },
+    { name: "FCA-Inline", icon: <ClipboardIcon className="h-5 w-5" />, path: "/fca-inline" },
+    { name: "FCA-Endline", icon: <ClipboardDocumentCheckIcon className="h-5 w-5" />, path: "/fca-endline" },
     { name: "View Page", icon: <EyeIcon className="h-5 w-5" />, path: "/view-audits" },
     { name: "Add Data Page", icon: <PlusIcon className="h-5 w-5" />, path: "/add-data" },
   ];
