@@ -16,6 +16,8 @@ import {
   fetchSizes,
   fetchDefectCategories,
   fetchDefectCodes,
+  fetchCustomers,
+  fetchStyles,
   submitFCAData,
 } from "../services/api";
 import { calculateDefectRate, determineStatus } from "../utils/validations";
@@ -35,6 +37,8 @@ const FCAForm = () => {
   const [modules, setModules] = useState([]);
   const [pos, setPos] = useState([]);
   const [sizes, setSizes] = useState([]);
+  const [customers, setCustomers] = useState([]);
+  const [styles, setStyles] = useState([]);
   const [defectCategories, setDefectCategories] = useState([]);
   const [defectCodes, setDefectCodes] = useState([]);
   const [formData, setFormData] = useState({
@@ -43,6 +47,8 @@ const FCAForm = () => {
     shift: "A",
     po: "",
     size: "",
+    customer: "",
+    style: "",
     inspectedQuantity: "",
     defectQuantity: "",
     defectCategory: "",
@@ -120,6 +126,41 @@ const FCAForm = () => {
       loadSizes();
     }
   }, [formData.po]);
+
+  useEffect(() => {
+    if (formData.po) {
+      const loadStyles = async () => {
+        const sizeData = await fetchStyles(formData.po);
+        setStyles(
+          sizeData.map((item) => ({
+            id: item.id,
+            label: item.Style,
+            value: item.id,
+          }))
+        );
+      };
+      loadStyles();
+    }
+  }, [formData.po]);
+
+
+  useEffect(() => {
+    if (formData.po) {
+      const loadCustomers = async () => {
+        const sizeData = await fetchCustomers(formData.po);
+        setCustomers(
+          sizeData.map((item) => ({
+            id: item.id,
+            label: item.Customers,
+            value: item.id,
+          }))
+        );
+      };
+      loadCustomers();
+    }
+  }, [formData.po]);
+
+
 
   useEffect(() => {
     const loadDefectCategories = async () => {
@@ -204,6 +245,8 @@ const FCAForm = () => {
         shift: "A",
         po: "",
         size: "",
+        customer:"",
+        style:"",
         inspectedQuantity: "",
         defectQuantity: "",
         defectCategory: "",

@@ -42,6 +42,27 @@ export const fetchSizes = async (po) => {
     }
 };
 
+export const fetchStyles = async (po) => {
+    try {
+        const response = await axios.get(`${API_URL}/styles/${po}`);
+        return response.data;
+    } catch (error) {
+        console.error(`Error fetching sizes for ${po}:`, error);
+        return [];
+    }
+};
+
+export const fetchCustomers = async (po) => {
+    try {
+        const response = await axios.get(`${API_URL}/customers/${po}`);
+        return response.data;
+    } catch (error) {
+        console.error(`Error fetching sizes for ${po}:`, error);
+        return [];
+    }
+};
+
+
 export const fetchDefectCategories = async () => {
     try {
         const response = await axios.get(`${API_URL}/defect-categories`);
