@@ -37,8 +37,6 @@ const FCAForm = () => {
   const [modules, setModules] = useState([]);
   const [pos, setPos] = useState([]);
   const [sizes, setSizes] = useState([]);
-  const [customers, setCustomers] = useState([]);
-  const [styles, setStyles] = useState([]);
   const [defectCategories, setDefectCategories] = useState([]);
   const [defectCodes, setDefectCodes] = useState([]);
   const [formData, setFormData] = useState({
@@ -127,39 +125,36 @@ const FCAForm = () => {
     }
   }, [formData.po]);
 
-  useEffect(() => {
-    if (formData.po) {
-      const loadStyles = async () => {
-        const sizeData = await fetchStyles(formData.po);
-        setStyles(
-          sizeData.map((item) => ({
-            id: item.id,
-            label: item.Style,
-            value: item.id,
-          }))
-        );
-      };
-      loadStyles();
-    }
-  }, [formData.po]);
-
+//loadcustomers and styles
 
   useEffect(() => {
     if (formData.po) {
-      const loadCustomers = async () => {
-        const sizeData = await fetchCustomers(formData.po);
-        setCustomers(
-          sizeData.map((item) => ({
-            id: item.id,
-            label: item.Customers,
-            value: item.id,
-          }))
-        );
+      const loadStylesAndCustomers = async () => {
+        const styleData = await fetchStyles(formData.po);
+        const selectedStyle = styleData.length > 0 ? styleData[0].styles : "";
+        setFormData((prevData) => ({
+          ...prevData,
+          style: selectedStyle,
+        }));
+  
+        const customerData = await fetchCustomers(formData.po);
+        const selectedCustomer = customerData.length > 0 ? customerData[0].customers : "";
+        setFormData((prevData) => ({
+          ...prevData,
+          customer: selectedCustomer,
+        }));
       };
-      loadCustomers();
+  
+      loadStylesAndCustomers();
+    } else {
+      setFormData((prevData) => ({
+        ...prevData,
+        customer: "",
+        style: "",
+      }));
     }
   }, [formData.po]);
-
+  
 
 
   useEffect(() => {
@@ -330,6 +325,24 @@ const FCAForm = () => {
               error={errors.size}
             />
           </motion.div>
+
+          {/*non editable labels */}
+          {formData.customer && (
+  <motion.div variants={itemVariants}>
+    <label className="block text-sm font-medium text-gray-700">Customer</label>
+    <p className="mt-1 text-sm text-gray-800 bg-gray-100 rounded-md p-2">{formData.customer}</p>
+  </motion.div>
+)}
+{formData.style && (
+  <motion.div variants={itemVariants}>
+    <label className="block text-sm font-medium text-gray-700">Style</label>
+    <p className="mt-1 text-sm text-gray-800 bg-gray-100 rounded-md p-2">{formData.style}</p>
+  </motion.div>
+)}
+
+
+
+
         </div>
 
         {/* Right side fields */}
