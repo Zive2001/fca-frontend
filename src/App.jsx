@@ -8,6 +8,7 @@ import FloatingMenu from "./components/FloatingMenu"; // Import FloatingMenu
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "./index.css"; // Global CSS
+import AddData from "./pages/AddData";
 
 const App = () => {
   return (
@@ -32,6 +33,8 @@ const App = () => {
 
           {/* Admin Panel for viewing and managing audits */}
           <Route path="/view-audits" element={<Admin />} />
+
+          <Route path="/add-Data" element={<AddData />} />
 
           {/* Additional routes can be added here */}
         </Routes>
