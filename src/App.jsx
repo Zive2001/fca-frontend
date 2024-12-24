@@ -9,6 +9,7 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "./index.css"; // Global CSS
 import AddData from "./pages/AddData";
+import Home from "./pages/Home";
 
 const App = () => {
   return (
@@ -35,6 +36,8 @@ const App = () => {
           <Route path="/view-audits" element={<Admin />} />
 
           <Route path="/add-Data" element={<AddData />} />
+
+          <Route path="/home" element={<Home />} />
 
           {/* Additional routes can be added here */}
         </Routes>
