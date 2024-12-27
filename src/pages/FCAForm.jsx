@@ -9,6 +9,7 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import CurrDate from '../components/CurrDate';
 import { PlusCircleIcon, TrashIcon } from "@heroicons/react/24/solid";
+import Select from "react-select";
 
 import {
   fetchPlants,
@@ -106,7 +107,7 @@ const FCAForm = () => {
           poData.map((item) => ({
             id: item.id,
             label: item.Sewing_Order,
-            value: item.id,
+            value: `${item.Plant}-${item.Module}-${item.Sewing_Order}`,
           }))
         );
       };
@@ -117,7 +118,8 @@ const FCAForm = () => {
   useEffect(() => {
     if (formData.po) {
       const loadSizes = async () => {
-        const sizeData = await fetchSizes(formData.po);
+        const poValue = formData.po.split("-")[2];
+        const sizeData = await fetchSizes(poValue);
         setSizes(
           sizeData.map((item) => ({
             id: item.id,
@@ -392,14 +394,24 @@ const FCAForm = () => {
               />
             </motion.div>
             <motion.div variants={itemVariants}>
-              <Dropdown
-                label="Select PO"
-                options={pos}
-                value={formData.po}
-                onChange={(value) => handleChange("po", value)}
-                error={errors.po}
-              />
-            </motion.div>
+            <label htmlFor="po-select" className="block text-sm font-medium text-gray-700 mb-1">
+    Select PO
+  </label>
+            <Select
+            
+  options={pos}
+  value={pos.find((po) => po.value === formData.po) || null}
+  onChange={(selectedOption) =>
+    handleChange("po", selectedOption?.value || "")
+  }
+ 
+  placeholder="Search PO"
+  isSearchable
+/>
+  {errors.po && <span className="text-red-500">{errors.po}</span>}
+</motion.div>
+
+
             <motion.div variants={itemVariants}>
               <Dropdown
                 label="Select Size"
@@ -422,14 +434,37 @@ const FCAForm = () => {
               </motion.div>
             )}
             <motion.div variants={itemVariants}>
-              <InputField
-                label="Inspected Quantity"
-                type="number"
-                value={formData.inspectedQuantity}
-                onChange={(value) => handleChange("inspectedQuantity", value)}
-                error={errors.inspectedQuantity}
-              />
-            </motion.div>
+  <label className="block text-sm font-medium text-gray-700 mb-2">
+    Inspected Quantity
+  </label>
+  <div className="flex space-x-4">
+    {[20, 32].map((quantity) => (
+      <div key={quantity} className="flex items-center">
+        <input
+          id={`quantity-${quantity}`}
+          type="radio"
+          name="inspectedQuantity"
+          value={quantity}
+          checked={formData.inspectedQuantity === quantity}
+          onChange={(e) =>
+            handleChange("inspectedQuantity", Number(e.target.value))
+          }
+          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+        />
+        <label
+          htmlFor={`quantity-${quantity}`}
+          className="ml-2 block text-sm font-medium text-gray-700"
+        >
+          {quantity}
+        </label>
+      </div>
+    ))}
+  </div>
+  {errors.inspectedQuantity && (
+    <p className="text-sm text-red-600 mt-1">{errors.inspectedQuantity}</p>
+  )}
+</motion.div>
+
             <motion.div variants={itemVariants}>
               <InputField
                 label="Remarks"
