@@ -12,8 +12,8 @@ const Dropdown = ({ label, options, value, onChange, error }) => {
         onChange={(e) => onChange(e.target.value)}
       >
         <option value="">Select...</option>
-        {options.map((option) => (
-          <option key={option.id} value={option.value}>
+        {options.map((option, index) => (
+          <option key={option.id || index} value={option.value}>
             {option.label}
           </option>
         ))}
