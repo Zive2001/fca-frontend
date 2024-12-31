@@ -68,12 +68,45 @@ const FCAForm = () => {
 
   
 
-  // Fetching data for dropdowns
+  // Modified useEffect for plant data
   useEffect(() => {
     const loadData = async () => {
       const plantData = await fetchPlants();
+      
+      // Custom sorting function
+      const sortPlants = (plants) => {
+        // Define the desired order
+        const order = [
+          'BPL1-VS1',
+          'BPL1-VS2',
+          'BPL1-VS4',
+          'BPL2-VS1',
+          'BPL2-VS2',
+          'others'
+        ];
+
+        // Create a map for ordering
+        const orderMap = new Map(order.map((item, index) => [item, index]));
+
+        // Sort the plants based on the defined order
+        return plants.sort((a, b) => {
+          const aOrder = orderMap.has(a.Production_Section) ? 
+            orderMap.get(a.Production_Section) : 
+            order.length; // Put unknown items at the end
+          const bOrder = orderMap.has(b.Production_Section) ? 
+            orderMap.get(b.Production_Section) : 
+            order.length; // Put unknown items at the end
+          
+          return aOrder - bOrder;
+        });
+      };
+
+      // Sort the plant data
+      const sortedPlantData = sortPlants(plantData);
+
+      // Transform the sorted data into the required format
       setPlants(
-        plantData.map((item) => ({
+        sortedPlantData.map((item) => ({
           id: item.id,
           label: item.Production_Section,
           value: item.id,
@@ -82,6 +115,7 @@ const FCAForm = () => {
     };
     loadData();
   }, []);
+
 
   useEffect(() => {
     if (formData.plant) {
@@ -221,35 +255,45 @@ useEffect(() => {
   }, [newDefect.defectCategory]);
   
     // Add a new defect entry
-    const addDefectEntry = () => {
-      const { defectCategory, defectCode, quantity } = newDefect;
-  
-      if (!defectCategory || !defectCode || !quantity) {
-        toast.error("All fields for defect entry are required.");
-        return;
-      }
-  
-      const totalQuantity = formData.defectEntries.reduce(
-        (total, entry) => total + entry.quantity,
-        0
-      );
-  
-      if (totalQuantity  > Number(formData.defectQuantity)) {
-        toast.error("Total defect quantity cannot exceed the specified defect quantity.");
-        return;
-      }
-  
-      setFormData((prevData) => ({
-        ...prevData,
-        defectEntries: [
-          ...prevData.defectEntries,
-          { defectCategory, defectCode, quantity: Number(quantity) },
-        ],
-      }));
-  
-      setNewDefect({ defectCategory: "", defectCode: "", quantity: "" });
-    };
-  
+   // Add a new defect entry with updated validation
+  const addDefectEntry = () => {
+    const { defectCategory, defectCode, quantity } = newDefect;
+    const enteredQuantity = Number(quantity);
+    const maxDefectQuantity = Number(formData.defectQuantity);
+
+    // Basic validation
+    if (!defectCategory || !defectCode || !quantity) {
+      toast.error("All fields for defect entry are required.");
+      return;
+    }
+
+    // Validate that individual quantity doesn't exceed max defect quantity
+    if (enteredQuantity > maxDefectQuantity) {
+      toast.error(`Individual defect quantity cannot exceed the total defect quantity (${maxDefectQuantity}).`);
+      return;
+    }
+
+    // Validate that quantity is a positive number
+    if (enteredQuantity <= 0) {
+      toast.error("Defect quantity must be greater than 0.");
+      return;
+    }
+
+    setFormData((prevData) => ({
+      ...prevData,
+      defectEntries: [
+        ...prevData.defectEntries,
+        { 
+          defectCategory, 
+          defectCode, 
+          quantity: enteredQuantity 
+        },
+      ],
+    }));
+
+    setNewDefect({ defectCategory: "", defectCode: "", quantity: "" });
+  };
+
     // Remove a defect entry
     const removeDefectEntry = (index) => {
       setFormData((prevData) => ({
@@ -289,11 +333,15 @@ useEffect(() => {
       if (!formData.po) formErrors.po = "PO is required.";
       if (!formData.size) formErrors.size = "Size is required.";
       if (!formData.inspectedQuantity) formErrors.inspectedQuantity = "Inspected Quantity is required.";
-      if (!formData.defectQuantity) formErrors.defectQuantity = "Defect Quantity is required.";
+      if (formData.defectQuantity === "") formErrors.defectQuantity = "Defect Quantity is required.";
       if (defectQuantity > inspectedQuantity) formErrors.defectQuantity = "Defect quantity cannot exceed inspected quantity.";
       if (defectQuantity < 0) formErrors.defectQuantity = "Defect quantity cannot be negative.";
       if (inspectedQuantity < 0) formErrors.inspectedQuantity = "Inspected quantity cannot be negative.";
-      if (formData.defectEntries.length === 0) formErrors.defectEntries = "At least one defect entry is required.";
+      
+      // Only validate defect entries if defect quantity is greater than 0
+      if (defectQuantity > 0 && formData.defectEntries.length === 0) {
+        formErrors.defectEntries = "At least one defect entry is required when defect quantity is greater than 0.";
+      }
     
       // Display errors if any
       if (Object.keys(formErrors).length > 0) {
@@ -322,7 +370,6 @@ useEffect(() => {
         defectDetails,
         status: formData.status,
         defectRate: formData.defectRate,
-       // photoLinks: formData.photos, // Ensure this is an array or serialized string
         remarks: formData.remarks,
         type: formData.type,
       };
@@ -359,6 +406,7 @@ useEffect(() => {
         toast.error("There was an error submitting the form.");
       }
     };
+  
     
     return (
       <motion.div
@@ -598,6 +646,7 @@ useEffect(() => {
             <button
               className="text-red-500 hover:text-red-600"
               onClick={() => removeDefectEntry(index)}
+              type="button"
             >
               <TrashIcon className="h-5 w-5" />
             </button>
