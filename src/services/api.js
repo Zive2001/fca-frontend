@@ -166,3 +166,59 @@ export const uploadDefectPhoto = async (file) => {
     throw error;
   }
 };
+
+// Add these functions to your api.js file
+
+// Photo-related API endpoints
+export const addDefectPhoto = async (auditId, defectId, file) => {
+  try {
+    // Create FormData object
+    const formData = new FormData();
+    formData.append('auditId', auditId);
+    formData.append('defectId', defectId);
+    formData.append('photo', file);
+
+    const response = await axios.post('/api/fca/photos/add', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error('Error uploading defect photo:', error);
+    throw error;
+  }
+};
+
+export const getDefectPhoto = async (photoId) => {
+  try {
+    const response = await axios.get(`${API_URL}/photos/${photoId}`, {
+      responseType: 'blob'
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching defect photo:', error);
+    throw error;
+  }
+};
+
+export const getDefectPhotos = async (defectId) => {
+  try {
+    const response = await axios.get(`${API_URL}/photos/defect/${defectId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching defect photos:', error);
+    return [];
+  }
+};
+
+export const deleteDefectPhoto = async (photoId) => {
+  try {
+    const response = await axios.delete(`/api/fca/photos/${photoId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error deleting defect photo:', error);
+    throw error;
+  }
+};

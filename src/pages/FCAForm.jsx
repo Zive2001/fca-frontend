@@ -10,6 +10,7 @@ import "react-toastify/dist/ReactToastify.css";
 import CurrDate from '../components/CurrDate';
 import { PlusCircleIcon, TrashIcon } from "@heroicons/react/24/solid";
 import Select from "react-select";
+import DefectEntry from '../components/DefectEntry';
 
 import {
   fetchPlants,
@@ -296,6 +297,10 @@ useEffect(() => {
 
     // Remove a defect entry
     const removeDefectEntry = (index) => {
+      const entry = formData.defectEntries[index];
+      if (entry.photos) {
+        entry.photos.forEach(photo => URL.revokeObjectURL(photo.preview));
+      }
       setFormData((prevData) => ({
         ...prevData,
         defectEntries: prevData.defectEntries.filter((_, i) => i !== index),
@@ -355,6 +360,7 @@ useEffect(() => {
         defectCategory: entry.defectCategory,
         defectCode: entry.defectCode,
         quantity: Number(entry.quantity),
+        photos: entry.photos || [] 
       }));
     
       const submissionData = {
@@ -631,29 +637,20 @@ useEffect(() => {
       Add Defect
     </button>
     <div className="mt-6">
-      <h3 className="text-md font-semibold mb-2 text-gray-800 dark:text-gray-100">
-        Defect Entries
-      </h3>
-      <ul className="space-y-2">
-        {formData.defectEntries.map((entry, index) => (
-          <li
-            key={index}
-            className="flex justify-between items-center bg-gray-50 dark:bg-gray-700 p-2 rounded shadow"
-          >
-            <span className="text-gray-700 dark:text-gray-200">
-              {entry.defectCategory} - {entry.defectCode}: {entry.quantity}
-            </span>
-            <button
-              className="text-red-500 hover:text-red-600"
-              onClick={() => removeDefectEntry(index)}
-              type="button"
-            >
-              <TrashIcon className="h-5 w-5" />
-            </button>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+  <h3 className="text-md font-semibold mb-2 text-gray-800 dark:text-gray-100">
+    Defect Entries
+  </h3>
+  <ul className="space-y-2">
+    {formData.defectEntries.map((entry, index) => (
+      <DefectEntry
+        key={index}
+        entry={entry}
+        index={index}
+        onRemove={removeDefectEntry}
+      />
+    ))}
+  </ul>
+</div>
             </motion.div>
     
             {/* Submit */}
