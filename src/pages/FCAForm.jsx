@@ -107,7 +107,8 @@ const FCAForm = () => {
           poData.map((item) => ({
             id: item.id,
             label: item.Sewing_Order,
-            value: `${item.Plant}-${item.Module}-${item.Sewing_Order}`,
+            // Store the raw PO number as value
+            value: item.Sewing_Order
           }))
         );
       };
@@ -116,53 +117,67 @@ const FCAForm = () => {
   }, [formData.module]);
 
   useEffect(() => {
-    if (formData.po) {
-      const loadSizes = async () => {
-        const poValue = formData.po.split("-")[2];
-        const sizeData = await fetchSizes(poValue);
+  if (formData.po) {
+    const loadSizes = async () => {
+      try {
+        // Just pass the PO number
+        const sizeData = await fetchSizes(formData.po);
         setSizes(
           sizeData.map((item) => ({
-            id: item.id,
-            label: item.Size,
-            value: item.id,
+            id: item.Size, // Use Size as id
+            label: item.Size, // Display Size as label
+            value: item.Size  // Use Size as value
           }))
         );
-      };
-      loadSizes();
-    }
-  }, [formData.po]);
+      } catch (error) {
+        console.error("Error loading sizes:", error);
+        toast.error("Error loading size information");
+        setSizes([]);
+      }
+    };
+
+    loadSizes();
+  } else {
+    setSizes([]);
+  }
+}, [formData.po]);
 
 //loadcustomers and styles
 
-  useEffect(() => {
-    if (formData.po) {
-      const loadStylesAndCustomers = async () => {
+useEffect(() => {
+  if (formData.po) {
+    const loadStylesAndCustomers = async () => {
+      try {
+        // Now passing just the PO number
         const styleData = await fetchStyles(formData.po);
-        const selectedStyle = styleData.length > 0 ? styleData[0].styles : "";
+        const selectedStyle = styleData.length > 0 ? styleData[0].Customer_Style : "";
         setFormData((prevData) => ({
           ...prevData,
           style: selectedStyle,
         }));
-  
+
         const customerData = await fetchCustomers(formData.po);
-        const selectedCustomer = customerData.length > 0 ? customerData[0].customers : "";
+        const selectedCustomer = customerData.length > 0 ? customerData[0].BPL_Customer_Code : "";
         setFormData((prevData) => ({
           ...prevData,
           customer: selectedCustomer,
         }));
-      };
-  
-      loadStylesAndCustomers();
-    } else {
-      setFormData((prevData) => ({
-        ...prevData,
-        customer: "",
-        style: "",
-      }));
-    }
-  }, [formData.po]);
-  
+      } catch (error) {
+        console.error("Error loading styles and customers:", error);
+        // Handle error appropriately
+        toast.error("Error loading style and customer information");
+      }
+    };
 
+    loadStylesAndCustomers();
+  } else {
+    setFormData((prevData) => ({
+      ...prevData,
+      customer: "",
+      style: "",
+    }));
+  }
+}, [formData.po]);
 
  
     // Load defect categories
@@ -186,24 +201,24 @@ const FCAForm = () => {
     // Load defect codes based on selected defect category
     useEffect(() => {
       if (newDefect.defectCategory) {
-        const loadDefectCodes = async () => {
-          try {
-            const codeData = await fetchDefectCodes(newDefect.defectCategory);
-            const formattedCodes = codeData.map((item) => ({
-              id: item.UnqId,
-              label: item.Defect_Code,
-              value: item.Defect_Code,
-            }));
-            setDefectCodes(formattedCodes);
-          } catch (error) {
-            console.error("Error fetching defect codes:", error);
-          }
-        };
-        loadDefectCodes();
+          const loadDefectCodes = async () => {
+              try {
+                  const codeData = await fetchDefectCodes(newDefect.defectCategory);
+                  const formattedCodes = codeData.map((item) => ({
+                      id: item.UnqId,
+                      label: item.Combined_Defect, // Changed from Defect_Code
+                      value: item.Combined_Defect, // Changed from Defect_Code
+                  }));
+                  setDefectCodes(formattedCodes);
+              } catch (error) {
+                  console.error("Error fetching defect codes:", error);
+              }
+          };
+          loadDefectCodes();
       } else {
-        setDefectCodes([]);
+          setDefectCodes([]);
       }
-    }, [newDefect.defectCategory]);
+  }, [newDefect.defectCategory]);
   
     // Add a new defect entry
     const addDefectEntry = () => {
@@ -219,7 +234,7 @@ const FCAForm = () => {
         0
       );
   
-      if (totalQuantity + Number(quantity) > Number(formData.defectQuantity)) {
+      if (totalQuantity  > Number(formData.defectQuantity)) {
         toast.error("Total defect quantity cannot exceed the specified defect quantity.");
         return;
       }

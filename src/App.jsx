@@ -21,25 +21,24 @@ const App = () => {
         {/* FloatingMenu Component */}
         <FloatingMenu />
 
-        {/* Application Routes */}
+       
         <Routes>
-          {/* Landing page route */}
+          
           <Route path="/" element={<LandingPage />} />
 
-          {/* Inline FCA Form */}
+         
           <Route path="/fca-inline" element={<FCAForm />} />
 
-          {/* Endline FCA Form */}
           <Route path="/fca-endline" element={<FCAEndline />} />
 
-          {/* Admin Panel for viewing and managing audits */}
+          
           <Route path="/view-audits" element={<Admin />} />
 
           <Route path="/add-Data" element={<AddData />} />
 
           <Route path="/home" element={<Home />} />
 
-          {/* Additional routes can be added here */}
+         
         </Routes>
       
     </Router>

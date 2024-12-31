@@ -37,6 +37,10 @@ export const fetchPOs = async (module) => {
 export const fetchSizes = async (po) => {
   try {
     const response = await axios.get(`${API_URL}/sizes/${po}`);
+    if (!response.data || response.data.length === 0) {
+      console.warn(`No sizes found for PO ${po}`);
+      return [];
+    }
     return response.data;
   } catch (error) {
     console.error(`Error fetching sizes for PO ${po}:`, error);
@@ -141,6 +145,24 @@ export const uploadExcel = async (file) => {
     return response.data;
   } catch (error) {
     console.error("Error uploading Excel file:", error);
+    throw error;
+  }
+};
+
+export const uploadDefectPhoto = async (file) => {
+  try {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const response = await axios.post('/api/upload-defect-photo', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+
+    return response.data; // Contains { photoUrl }
+  } catch (error) {
+    console.error('Error uploading defect photo:', error.response?.data || error.message);
     throw error;
   }
 };
