@@ -172,13 +172,12 @@ export const uploadDefectPhoto = async (file) => {
 // Photo-related API endpoints
 export const addDefectPhoto = async (auditId, defectId, file) => {
   try {
-    // Create FormData object
     const formData = new FormData();
-    formData.append('auditId', auditId);
-    formData.append('defectId', defectId);
     formData.append('photo', file);
+    formData.append('auditId', auditId.toString());
+    formData.append('defectId', defectId.toString());
 
-    const response = await axios.post('/api/fca/photos/add', formData, {
+    const response = await axios.post(`${API_URL}/photos/add`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
@@ -186,8 +185,8 @@ export const addDefectPhoto = async (auditId, defectId, file) => {
 
     return response.data;
   } catch (error) {
-    console.error('Error uploading defect photo:', error);
-    throw error;
+    console.error('Error uploading defect photo:', error.response?.data || error.message);
+    throw new Error(error.response?.data?.error || 'Failed to upload photo');
   }
 };
 
@@ -196,7 +195,7 @@ export const getDefectPhoto = async (photoId) => {
     const response = await axios.get(`${API_URL}/photos/${photoId}`, {
       responseType: 'blob'
     });
-    return response.data;
+    return URL.createObjectURL(response.data);
   } catch (error) {
     console.error('Error fetching defect photo:', error);
     throw error;

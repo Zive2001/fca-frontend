@@ -22,6 +22,7 @@ import {
   fetchCustomers,
   fetchStyles,
   submitFCAData,
+  addDefectPhoto
 } from "../services/api";
 import { calculateDefectRate, determineStatus } from "../utils/validations";
 
@@ -43,6 +44,7 @@ const FCAForm = () => {
   const [sizes, setSizes] = useState([]);
   const [defectCategories, setDefectCategories] = useState([]);
   const [defectCodes, setDefectCodes] = useState([]);
+  const [defectPhotos, setDefectPhotos] = useState({});
   const [formData, setFormData] = useState({
   plant: "",
   module: "",
@@ -257,6 +259,13 @@ useEffect(() => {
   
     // Add a new defect entry
    // Add a new defect entry with updated validation
+   const handleDefectPhotos = (defectIndex, photos) => {
+    setDefectPhotos(prev => ({
+      ...prev,
+      [defectIndex]: photos
+    }));
+  };
+
   const addDefectEntry = () => {
     const { defectCategory, defectCode, quantity } = newDefect;
     const enteredQuantity = Number(quantity);
@@ -285,6 +294,7 @@ useEffect(() => {
       defectEntries: [
         ...prevData.defectEntries,
         { 
+          id: Date.now(),
           defectCategory, 
           defectCode, 
           quantity: enteredQuantity 
@@ -381,10 +391,65 @@ useEffect(() => {
       };
     
       try {
-        await submitFCAData(submissionData);
+        // Submit main form data
+        const submissionData = {
+          plant: formData.plant,
+          module: formData.module,
+          shift: formData.shift,
+          po: formData.po,
+          size: formData.size,
+          customer: formData.customer,
+          style: formData.style,
+          inspectedQuantity,
+          defectQuantity,
+          defectDetails: formData.defectEntries.map(entry => ({
+            defectCategory: entry.defectCategory,
+            defectCode: entry.defectCode,
+            quantity: Number(entry.quantity)
+          })),
+          status: formData.status,
+          defectRate: formData.defectRate,
+          remarks: formData.remarks,
+          type: formData.type,
+        };
+    
+        // Submit form data first
+        const response = await submitFCAData(submissionData);
+        
+        if (!response || !response.auditId) {
+          throw new Error('No audit ID received from form submission');
+        }
+    
+        const auditId = response.auditId;
+    
+        // Then upload photos if any exist
+        if (Object.keys(defectPhotos).length > 0) {
+          const photoUploadPromises = Object.entries(defectPhotos).map(async ([defectIndex, photos]) => {
+            const defectEntry = formData.defectEntries[defectIndex];
+            if (!defectEntry || !defectEntry.id) {
+              console.warn(`No defect ID found for index ${defectIndex}`);
+              return;
+            }
+    
+            return Promise.all(
+              photos.map(async (photo) => {
+                try {
+                  return await addDefectPhoto(auditId, defectEntry.id, photo);
+                } catch (photoError) {
+                  console.error('Error uploading photo:', photoError);
+                  toast.error(`Failed to upload photo: ${photo.name}`);
+                  return null;
+                }
+              })
+            );
+          });
+    
+          await Promise.all(photoUploadPromises);
+        }
+    
         toast.success("Form submitted successfully!");
     
-        // Clear form data after successful submission
+        // Clear form data
         setFormData({
           plant: "",
           module: "",
@@ -405,11 +470,15 @@ useEffect(() => {
           type: "Inline",
         });
     
+        // Clear defect photos
+        setDefectPhotos({});
+        
         // Clear errors
         setErrors({});
+    
       } catch (error) {
         console.error("Error submitting form:", error);
-        toast.error("There was an error submitting the form.");
+        toast.error(error.message || "There was an error submitting the form.");
       }
     };
   
@@ -641,14 +710,15 @@ useEffect(() => {
     Defect Entries
   </h3>
   <ul className="space-y-2">
-    {formData.defectEntries.map((entry, index) => (
-      <DefectEntry
-        key={index}
-        entry={entry}
-        index={index}
-        onRemove={removeDefectEntry}
-      />
-    ))}
+  {formData.defectEntries.map((entry, index) => (
+  <DefectEntry
+    key={index}
+    entry={entry}
+    index={index}
+    onRemove={removeDefectEntry}
+    onPhotosChange={handleDefectPhotos}
+  />
+))}
   </ul>
 </div>
             </motion.div>
