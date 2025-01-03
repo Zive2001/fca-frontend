@@ -68,6 +68,26 @@ export const fetchCustomers = async (po) => {
   }
 };
 
+export const fetchCustomerColor = async (po) => {
+  try {
+    const response = await axios.get(`${API_URL}/color/${po}`);
+    return response.data;
+  } catch (error) {
+    console.error(`Error fetching customer color for PO ${po}:`, error);
+    return [];
+  }
+};
+
+export const fetchCustomerColorDesc = async (po) => {
+  try {
+    const response = await axios.get(`${API_URL}/colordesc/${po}`);
+    return response.data;
+  } catch (error) {
+    console.error(`Error fetching color description for PO ${po}:`, error);
+    return [];
+  }
+};
+
 // Defect APIs
 export const fetchDefectCategories = async () => {
   try {

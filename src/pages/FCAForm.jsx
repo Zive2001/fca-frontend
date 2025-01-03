@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { color, motion } from "framer-motion";
 import Dropdown from "../components/Dropdown";
 import InputField from "../components/InputField";
 import ConfirmSubmissionDialog from "../components/ConfirmSubmissionDialog";
@@ -21,6 +21,8 @@ import {
   fetchDefectCodes,
   fetchCustomers,
   fetchStyles,
+  fetchCustomerColor,
+  fetchCustomerColorDesc,
   submitFCAData,
   fetchDefectLocations,
   fetchLocationCategories,
@@ -64,6 +66,8 @@ const FCAForm = () => {
   size: "",
   customer: "",
   style: "",
+  color: "",
+  colorDesc: "",
   inspectedQuantity: "",
   defectQuantity: "",
   defectCategory: "",
@@ -80,10 +84,7 @@ const FCAForm = () => {
 
   const [errors, setErrors] = useState({});
 
-  const [selectedLocation, setSelectedLocation] = useState({
-    category: "",
-    location: ""
-  });
+
   
 
   // Modified useEffect for plant data
@@ -232,6 +233,41 @@ useEffect(() => {
   }
 }, [formData.po]);
 
+
+useEffect(() => {
+  if (formData.po) {
+    const loadColorAndDesc = async () => {
+      try {
+        // Now passing just the PO number
+        const colorData = await fetchCustomerColor(formData.po);
+        const selectedColor = colorData.length > 0 ? colorData[0].Customer_Color : "";
+        setFormData((prevData) => ({
+          ...prevData,
+          color: selectedColor,
+        }));
+
+        const colorDescData = await fetchCustomerColorDesc(formData.po);
+        const selectedDesc = colorDescData.length > 0 ? colorDescData[0].Customer_Color_Descr : "";
+        setFormData((prevData) => ({
+          ...prevData,
+          colorDesc: selectedDesc,
+        }));
+      } catch (error) {
+        console.error("Error loading color and description:", error);
+        // Handle error appropriately
+        toast.error("Error loading color and description");
+      }
+    };
+
+    loadColorAndDesc();
+  } else {
+    setFormData((prevData) => ({
+      ...prevData,
+      color: "",
+      colorDesc: "",
+    }));
+  }
+}, [formData.po]);
  
     // Load defect categories
     useEffect(() => {
@@ -446,6 +482,8 @@ useEffect(() => {
           size: formData.size,
           customer: formData.customer,
           style: formData.style,
+          color: formData.color,
+          colorDesc: formData.colorDesc,
           inspectedQuantity: Number(formData.inspectedQuantity),
           defectQuantity: Number(formData.defectQuantity),
           defectDetails,
@@ -506,6 +544,8 @@ useEffect(() => {
           size: "",
           customer: "",
           style: "",
+          color: "",
+          colorDesc: "",
           inspectedQuantity: "",
           defectQuantity: "",
           defectCategory: "",
@@ -627,6 +667,18 @@ useEffect(() => {
               <motion.div variants={itemVariants}>
                 <label className="block text-sm font-medium text-gray-700">Style</label>
                 <p className="mt-1 text-sm text-gray-800 bg-gray-100 rounded-md p-2">{formData.style}</p>
+              </motion.div>
+            )}
+            {formData.color && (
+              <motion.div variants={itemVariants}>
+                <label className="block text-sm font-medium text-gray-700">Color</label>
+                <p className="mt-1 text-sm text-gray-800 bg-gray-100 rounded-md p-2">{formData.color}</p>
+              </motion.div>
+            )}
+            {formData.colorDesc && (
+              <motion.div variants={itemVariants}>
+                <label className="block text-sm font-medium text-gray-700">Color Description</label>
+                <p className="mt-1 text-sm text-gray-800 bg-gray-100 rounded-md p-2">{formData.colorDesc}</p>
               </motion.div>
             )}
             <motion.div variants={itemVariants}>
