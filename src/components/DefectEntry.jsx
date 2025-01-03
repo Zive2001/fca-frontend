@@ -11,14 +11,10 @@ const DefectEntry = ({ entry, index, onRemove, onPhotosChange }) => {
     if (files.length === 0) return;
 
     try {
-      // Create preview URLs and store file objects
       const newPreviewUrls = files.map(file => URL.createObjectURL(file));
       setPreviewUrls(prev => [...prev, ...newPreviewUrls]);
       setPhotos(prev => [...prev, ...files]);
-      
-      // Notify parent component about photo changes
       onPhotosChange(index, files);
-      
     } catch (error) {
       console.error('Error handling photo upload:', error);
       toast.error('Error handling photo upload');
@@ -26,23 +22,23 @@ const DefectEntry = ({ entry, index, onRemove, onPhotosChange }) => {
   };
 
   const removePhoto = (photoIndex) => {
-    // Clean up preview URL
     URL.revokeObjectURL(previewUrls[photoIndex]);
-    
-    // Remove from state
     setPreviewUrls(prev => prev.filter((_, i) => i !== photoIndex));
     setPhotos(prev => prev.filter((_, i) => i !== photoIndex));
-    
-    // Notify parent component
     onPhotosChange(index, photos.filter((_, i) => i !== photoIndex));
   };
 
   return (
     <li className="flex flex-col bg-gray-50 dark:bg-gray-700 p-4 rounded shadow mb-4">
-      <div className="flex justify-between items-center mb-2">
-        <span className="text-gray-700 dark:text-gray-200">
-          {entry.defectCategory} - {entry.defectCode}: {entry.quantity}
-        </span>
+      <div className="flex justify-between items-start mb-2">
+        <div className="flex flex-col">
+          <span className="text-gray-700 dark:text-gray-200">
+            {entry.defectCategory} - {entry.defectCode}: {entry.quantity}
+          </span>
+          <span className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            Location: {entry.locationCategory} - {entry.defectLocation}
+          </span>
+        </div>
         <button
           className="text-red-500 hover:text-red-600"
           onClick={() => onRemove(index)}

@@ -22,6 +22,8 @@ import {
   fetchCustomers,
   fetchStyles,
   submitFCAData,
+  fetchDefectLocations,
+  fetchLocationCategories,
   addDefectPhoto
 } from "../services/api";
 import { calculateDefectRate, determineStatus } from "../utils/validations";
@@ -38,13 +40,22 @@ const itemVariants = {
 
 const FCAForm = () => {
   const [plants, setPlants] = useState([]);
-  const [newDefect, setNewDefect] = useState([])
+  const [newDefect, setNewDefect] = useState({
+    defectCategory: "",
+    defectCode: "",
+    quantity: "",
+    defectLocation: ""
+    
+});
   const [modules, setModules] = useState([]);
   const [pos, setPos] = useState([]);
   const [sizes, setSizes] = useState([]);
   const [defectCategories, setDefectCategories] = useState([]);
   const [defectCodes, setDefectCodes] = useState([]);
   const [defectPhotos, setDefectPhotos] = useState({});
+  const [locationCategories, setLocationCategories] = useState([]);
+  const [defectLocations, setDefectLocations] = useState([]);
+ 
   const [formData, setFormData] = useState({
   plant: "",
   module: "",
@@ -63,12 +74,16 @@ const FCAForm = () => {
   photos: [],
   status: "",
   defectRate: 0,
+  locationCategory: "",
   type: "Inline",
 });
 
   const [errors, setErrors] = useState({});
 
-
+  const [selectedLocation, setSelectedLocation] = useState({
+    category: "",
+    location: ""
+  });
   
 
   // Modified useEffect for plant data
@@ -179,6 +194,7 @@ const FCAForm = () => {
   }
 }, [formData.po]);
 
+
 //loadcustomers and styles
 
 useEffect(() => {
@@ -256,7 +272,45 @@ useEffect(() => {
           setDefectCodes([]);
       }
   }, [newDefect.defectCategory]);
-  
+
+  // Add new useEffect for loading location categories
+useEffect(() => {
+  const loadLocationCategories = async () => {
+      const categories = await fetchLocationCategories();
+      setLocationCategories(
+          categories.map(item => ({
+              id: item.Category,
+              label: item.Category,
+              value: item.Category
+          }))
+      );
+  };
+  loadLocationCategories();
+}, []);
+
+// Add useEffect for loading defect locations based on selected category
+useEffect(() => {
+  if (formData.locationCategory) {
+    const loadDefectLocations = async () => {
+      try {
+        const locations = await fetchDefectLocations(formData.locationCategory);
+        setDefectLocations(
+          locations.map(item => ({
+            id: item.Defect_Location,
+            label: item.Defect_Location,
+            value: item.Defect_Location
+          }))
+        );
+      } catch (error) {
+        console.error("Error loading defect locations:", error);
+        toast.error("Error loading defect locations");
+      }
+    };
+    loadDefectLocations();
+  } else {
+    setDefectLocations([]);
+  }
+}, [formData.locationCategory]);
     // Add a new defect entry
    // Add a new defect entry with updated validation
    const handleDefectPhotos = (defectIndex, photos) => {
@@ -267,12 +321,12 @@ useEffect(() => {
   };
 
   const addDefectEntry = () => {
-    const { defectCategory, defectCode, quantity } = newDefect;
+    const { defectCategory, defectCode, quantity, defectLocation } = newDefect;
     const enteredQuantity = Number(quantity);
     const maxDefectQuantity = Number(formData.defectQuantity);
 
     // Basic validation
-    if (!defectCategory || !defectCode || !quantity) {
+    if (!defectCategory || !defectCode || !quantity || !defectLocation) {
       toast.error("All fields for defect entry are required.");
       return;
     }
@@ -297,12 +351,14 @@ useEffect(() => {
           id: Date.now(),
           defectCategory, 
           defectCode, 
-          quantity: enteredQuantity 
+          quantity: enteredQuantity ,
+          locationCategory: prevData.locationCategory,
+          defectLocation
         },
       ],
     }));
 
-    setNewDefect({ defectCategory: "", defectCode: "", quantity: "" });
+    setNewDefect({ defectCategory: "", defectCode: "", quantity: "",defectLocation: "" });
   };
 
     // Remove a defect entry
@@ -392,63 +448,47 @@ useEffect(() => {
     
       try {
         // Submit main form data
-        const submissionData = {
-          plant: formData.plant,
-          module: formData.module,
-          shift: formData.shift,
-          po: formData.po,
-          size: formData.size,
-          customer: formData.customer,
-          style: formData.style,
-          inspectedQuantity,
-          defectQuantity,
-          defectDetails: formData.defectEntries.map(entry => ({
-            defectCategory: entry.defectCategory,
-            defectCode: entry.defectCode,
-            quantity: Number(entry.quantity)
-          })),
-          status: formData.status,
-          defectRate: formData.defectRate,
-          remarks: formData.remarks,
-          type: formData.type,
-        };
-    
-        // Submit form data first
         const response = await submitFCAData(submissionData);
         
         if (!response || !response.auditId) {
-          throw new Error('No audit ID received from form submission');
+            throw new Error('Server response missing audit ID');
         }
-    
+
         const auditId = response.auditId;
-    
-        // Then upload photos if any exist
+        const defectIds = response.defects || [];
+
+        // Upload photos for each defect if they exist
         if (Object.keys(defectPhotos).length > 0) {
-          const photoUploadPromises = Object.entries(defectPhotos).map(async ([defectIndex, photos]) => {
-            const defectEntry = formData.defectEntries[defectIndex];
-            if (!defectEntry || !defectEntry.id) {
-              console.warn(`No defect ID found for index ${defectIndex}`);
-              return;
-            }
-    
-            return Promise.all(
-              photos.map(async (photo) => {
-                try {
-                  return await addDefectPhoto(auditId, defectEntry.id, photo);
-                } catch (photoError) {
-                  console.error('Error uploading photo:', photoError);
-                  toast.error(`Failed to upload photo: ${photo.name}`);
-                  return null;
+            const photoUploadPromises = Object.entries(defectPhotos).map(async ([defectIndex, photos]) => {
+                const defectId = defectIds[defectIndex]?.Id;
+                if (!defectId) {
+                    console.warn(`No defect ID found for index ${defectIndex}`);
+                    return;
                 }
-              })
-            );
-          });
-    
-          await Promise.all(photoUploadPromises);
+
+                return Promise.all(
+                    photos.map(async (photo) => {
+                        try {
+                            const formData = new FormData();
+                            formData.append('photo', photo);
+                            formData.append('auditId', auditId.toString());
+                            formData.append('defectId', defectId.toString());
+                            
+                            return await addDefectPhoto(formData);
+                        } catch (photoError) {
+                            console.error('Error uploading photo:', photoError);
+                            toast.error(`Failed to upload photo: ${photo.name}`);
+                            return null;
+                        }
+                    })
+                );
+            });
+
+            await Promise.all(photoUploadPromises);
         }
-    
+
         toast.success("Form submitted successfully!");
-    
+
         // Clear form data
         setFormData({
           plant: "",
@@ -504,7 +544,7 @@ useEffect(() => {
     
             <motion.div variants={itemVariants}>
               <Dropdown
-                label="Select Plant"
+                label="1. Select Plant"
                 options={plants}
                 value={formData.plant}
                 onChange={(value) => handleChange("plant", value)}
@@ -513,7 +553,7 @@ useEffect(() => {
             </motion.div>
             <motion.div variants={itemVariants}>
               <Dropdown
-                label="Select Module"
+                label="2. Select Module"
                 options={modules}
                 value={formData.module}
                 onChange={(value) => handleChange("module", value)}
@@ -522,7 +562,7 @@ useEffect(() => {
             </motion.div>
             <motion.div variants={itemVariants}>
               <Dropdown
-                label="Select Shift"
+                label="3. Select Shift"
                 options={[
                   { id: "A", label: "A", value: "A" },
                   { id: "B", label: "B", value: "B" },
@@ -533,7 +573,7 @@ useEffect(() => {
             </motion.div>
             <motion.div variants={itemVariants}>
             <label htmlFor="po-select" className="block text-sm font-medium text-gray-700 mb-1">
-    Select PO
+    4. Select PO
   </label>
             <Select
             
@@ -552,13 +592,22 @@ useEffect(() => {
 
             <motion.div variants={itemVariants}>
               <Dropdown
-                label="Select Size"
+                label="5. Select Size"
                 options={sizes}
                 value={formData.size}
                 onChange={(value) => handleChange("size", value)}
                 error={errors.size}
               />
             </motion.div>
+            <motion.div variants={itemVariants}>
+  <Dropdown
+    label="Location Category"
+    options={locationCategories}
+    value={formData.locationCategory}
+    onChange={(value) => handleChange("locationCategory", value)}
+    error={errors.locationCategory}
+  />
+</motion.div>
             {formData.customer && (
               <motion.div variants={itemVariants}>
                 <label className="block text-sm font-medium text-gray-700">Customer</label>
@@ -573,7 +622,7 @@ useEffect(() => {
             )}
             <motion.div variants={itemVariants}>
   <label className="block text-sm font-medium text-gray-700 mb-2">
-    Inspected Quantity
+    6. Inspected Quantity
   </label>
   <div className="flex space-x-4">
     {[20, 32].map((quantity) => (
@@ -614,7 +663,7 @@ useEffect(() => {
             </motion.div>
             <motion.div variants={itemVariants}>
               <InputField
-                label="Defect Quantity"
+                label="7. Defect Quantity"
                 type="number"
                 value={formData.defectQuantity}
                 onChange={(value) => handleChange("defectQuantity", value)}
@@ -669,34 +718,44 @@ useEffect(() => {
           <div className="flex flex-col justify-between">
             <motion.div variants={itemVariants} className="border p-4 rounded">
               <h2 className="text-lg font-semibold mb-4">Add Defects</h2>
-              <div className="grid grid-cols-3 gap-4 items-end">
-                <Dropdown
-                  label="Defect Category"
-                  options={defectCategories}
-                  value={newDefect.defectCategory}
-                  onChange={(value) =>
-                    setNewDefect((prev) => ({ ...prev, defectCategory: value }))
-                  }
-                  error={errors.defectCategory}
-                />
-                <Dropdown
-                  label="Defect Code"
-                  options={defectCodes}
-                  value={newDefect.defectCode}
-                  onChange={(value) =>
-                    setNewDefect((prev) => ({ ...prev, defectCode: value }))
-                  }
-                  error={errors.defectCode}
-                />
-                <InputField
-                  label="Quantity"
-                  type="number"
-                  value={newDefect.quantity}
-                  onChange={(value) =>
-                    setNewDefect((prev) => ({ ...prev, quantity: value }))
-                  }
-                />
-              </div>
+              <div className="grid grid-cols-4 gap-4 items-end">
+        <Dropdown
+          label="Defect Category"
+          options={defectCategories}
+          value={newDefect.defectCategory}
+          onChange={(value) =>
+            setNewDefect((prev) => ({ ...prev, defectCategory: value }))
+          }
+          error={errors.defectCategory}
+        />
+        <Dropdown
+          label="Defect Code"
+          options={defectCodes}
+          value={newDefect.defectCode}
+          onChange={(value) =>
+            setNewDefect((prev) => ({ ...prev, defectCode: value }))
+          }
+          error={errors.defectCode}
+        />
+        <Dropdown
+          label="Defect Location"
+          options={defectLocations}
+          value={newDefect.defectLocation}
+          onChange={(value) =>
+            setNewDefect((prev) => ({ ...prev, defectLocation: value }))
+          }
+          disabled={!formData.locationCategory}
+          error={errors.defectLocation}
+        />
+        <InputField
+          label="Quantity"
+          type="number"
+          value={newDefect.quantity}
+          onChange={(value) =>
+            setNewDefect((prev) => ({ ...prev, quantity: value }))
+          }
+        />
+      </div>
               <button
       type="button"
       onClick={addDefectEntry}

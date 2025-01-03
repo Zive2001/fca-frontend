@@ -170,23 +170,17 @@ export const uploadDefectPhoto = async (file) => {
 // Add these functions to your api.js file
 
 // Photo-related API endpoints
-export const addDefectPhoto = async (auditId, defectId, file) => {
+export const addDefectPhoto = async (formData) => {
   try {
-    const formData = new FormData();
-    formData.append('photo', file);
-    formData.append('auditId', auditId.toString());
-    formData.append('defectId', defectId.toString());
-
-    const response = await axios.post(`${API_URL}/photos/add`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
-
-    return response.data;
+      const response = await axios.post(`${API_URL}/photos/add`, formData, {
+          headers: {
+              'Content-Type': 'multipart/form-data',
+          },
+      });
+      return response.data;
   } catch (error) {
-    console.error('Error uploading defect photo:', error.response?.data || error.message);
-    throw new Error(error.response?.data?.error || 'Failed to upload photo');
+      console.error('Error uploading defect photo:', error.response?.data || error.message);
+      throw new Error(error.response?.data?.error || 'Failed to upload photo');
   }
 };
 
@@ -219,5 +213,25 @@ export const deleteDefectPhoto = async (photoId) => {
   } catch (error) {
     console.error('Error deleting defect photo:', error);
     throw error;
+  }
+};
+
+export const fetchLocationCategories = async () => {
+  try {
+    const response = await axios.get(`${API_URL}/location-categories`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching location categories:", error);
+    return [];
+  }
+};
+
+export const fetchDefectLocations = async (category) => {
+  try {
+    const response = await axios.get(`${API_URL}/defect-locations/${category}`);
+    return response.data;
+  } catch (error) {
+    console.error(`Error fetching defect locations for category ${category}:`, error);
+    return [];
   }
 };
