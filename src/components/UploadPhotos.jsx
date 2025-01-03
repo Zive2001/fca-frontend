@@ -47,6 +47,8 @@ const UploadPhotos = ({ photos, onChange, onRemove }) => {
                 <input
                     id="file-input"
                     type="file"
+                    accept="image/*"
+                    capture="environment"
                     multiple
                     className="hidden"
                     onChange={handleFileChange}

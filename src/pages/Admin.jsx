@@ -150,7 +150,7 @@ const Admin = () => {
         defectQuantity: editingRecord.DefectQuantity,
         status: editingRecord.Status,
         defectRate: editingRecord.DefectRate,
-        photoLinks: editingRecord.PhotoLinks,
+        
         remarks: editingRecord.Remarks,
         type: editingRecord.Type,
         defects: editingRecord.defects
