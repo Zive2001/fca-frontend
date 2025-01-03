@@ -2,9 +2,9 @@ import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import Dropdown from "../components/Dropdown";
 import InputField from "../components/InputField";
-import UploadPhotos from "../components/UploadPhotos";
+import ConfirmSubmissionDialog from "../components/ConfirmSubmissionDialog";
 import Button from "../components/Button";
-import StatusBadge from "../components/StatusBadge";
+
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import CurrDate from '../components/CurrDate';
@@ -391,10 +391,10 @@ useEffect(() => {
       });
     };
 
-    const handleSubmit = async (e) => {
-      e.preventDefault();
+
     
-      // Form validation
+
+    const validateForm = () => {
       let formErrors = {};
       const inspectedQuantity = Number(formData.inspectedQuantity);
       const defectQuantity = Number(formData.defectQuantity);
@@ -414,81 +414,89 @@ useEffect(() => {
         formErrors.defectEntries = "At least one defect entry is required when defect quantity is greater than 0.";
       }
     
-      // Display errors if any
+      return formErrors;
+    };
+    
+    const handleSubmit = async (e) => {
+      e.preventDefault();
+      
+      const formErrors = validateForm();
       if (Object.keys(formErrors).length > 0) {
         setErrors(formErrors);
         Object.values(formErrors).forEach((error) => toast.error(error));
         return;
       }
+    };
     
-      // Prepare data for submission
-      const defectDetails = formData.defectEntries.map((entry) => ({
-        defectCategory: entry.defectCategory,
-        defectCode: entry.defectCode,
-        quantity: Number(entry.quantity),
-        photos: entry.photos || [] 
-      }));
-    
-      const submissionData = {
-        plant: formData.plant,
-        module: formData.module,
-        shift: formData.shift,
-        po: formData.po,
-        size: formData.size,
-        customer: formData.customer,
-        style: formData.style,
-        inspectedQuantity,
-        defectQuantity,
-        defectDetails,
-        status: formData.status,
-        defectRate: formData.defectRate,
-        remarks: formData.remarks,
-        type: formData.type,
-      };
-    
+    const handleConfirmedSubmit = async () => {
       try {
+        // Prepare data for submission
+        const defectDetails = formData.defectEntries.map((entry) => ({
+          defectCategory: entry.defectCategory,
+          defectCode: entry.defectCode,
+          quantity: Number(entry.quantity),
+          photos: entry.photos || []
+        }));
+    
+        const submissionData = {
+          plant: formData.plant,
+          module: formData.module,
+          shift: formData.shift,
+          po: formData.po,
+          size: formData.size,
+          customer: formData.customer,
+          style: formData.style,
+          inspectedQuantity: Number(formData.inspectedQuantity),
+          defectQuantity: Number(formData.defectQuantity),
+          defectDetails,
+          status: formData.status,
+          defectRate: formData.defectRate,
+          remarks: formData.remarks,
+          type: formData.type,
+        };
+    
         // Submit main form data
         const response = await submitFCAData(submissionData);
         
         if (!response || !response.auditId) {
-            throw new Error('Server response missing audit ID');
+          throw new Error('Server response missing audit ID');
         }
-
+    
         const auditId = response.auditId;
         const defectIds = response.defects || [];
-
+    
         // Upload photos for each defect if they exist
         if (Object.keys(defectPhotos).length > 0) {
-            const photoUploadPromises = Object.entries(defectPhotos).map(async ([defectIndex, photos]) => {
-                const defectId = defectIds[defectIndex]?.Id;
-                if (!defectId) {
-                    console.warn(`No defect ID found for index ${defectIndex}`);
-                    return;
+          const photoUploadPromises = Object.entries(defectPhotos).map(async ([defectIndex, photos]) => {
+            const defectId = defectIds[defectIndex]?.Id;
+            if (!defectId) {
+              console.warn(`No defect ID found for index ${defectIndex}`);
+              return;
+            }
+    
+            return Promise.all(
+              photos.map(async (photo) => {
+                try {
+                  const formData = new FormData();
+                  formData.append('photo', photo);
+                  formData.append('auditId', auditId.toString());
+                  formData.append('defectId', defectId.toString());
+                  
+                  return await addDefectPhoto(formData);
+                } catch (photoError) {
+                  console.error('Error uploading photo:', photoError);
+                  toast.error(`Failed to upload photo: ${photo.name}`);
+                  return null;
                 }
-
-                return Promise.all(
-                    photos.map(async (photo) => {
-                        try {
-                            const formData = new FormData();
-                            formData.append('photo', photo);
-                            formData.append('auditId', auditId.toString());
-                            formData.append('defectId', defectId.toString());
-                            
-                            return await addDefectPhoto(formData);
-                        } catch (photoError) {
-                            console.error('Error uploading photo:', photoError);
-                            toast.error(`Failed to upload photo: ${photo.name}`);
-                            return null;
-                        }
-                    })
-                );
-            });
-
-            await Promise.all(photoUploadPromises);
+              })
+            );
+          });
+    
+          await Promise.all(photoUploadPromises);
         }
-
+    
         toast.success("Form submitted successfully!");
-
+    
         // Clear form data
         setFormData({
           plant: "",
@@ -503,6 +511,7 @@ useEffect(() => {
           defectCategory: "",
           defectCode: "",
           defectEntries: [],
+          locationCategory: "",
           remarks: "",
           photos: [],
           status: "",
@@ -784,8 +793,11 @@ useEffect(() => {
     
             {/* Submit */}
             <div className="mt-6 flex justify-end">
-              <Button type="submit" variant="primary" label="Submit" />
-            </div>
+            <ConfirmSubmissionDialog 
+  onConfirm={handleConfirmedSubmit} 
+  validateForm={validateForm}
+/>
+</div>
           </div>
         </form>
       </motion.div>

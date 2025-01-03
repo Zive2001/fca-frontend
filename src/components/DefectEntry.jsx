@@ -1,3 +1,5 @@
+//DefectEntry.jsx
+
 import React, { useState } from 'react';
 import { TrashIcon, CameraIcon, XCircleIcon } from "@heroicons/react/24/solid";
 import { toast } from 'react-toastify';
