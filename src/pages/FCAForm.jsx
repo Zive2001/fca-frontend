@@ -57,6 +57,7 @@ const FCAForm = () => {
   const [defectPhotos, setDefectPhotos] = useState({});
   const [locationCategories, setLocationCategories] = useState([]);
   const [defectLocations, setDefectLocations] = useState([]);
+  const [isLocationCategoryLocked, setIsLocationCategoryLocked] = useState(false);
  
   const [formData, setFormData] = useState({
   plant: "",
@@ -360,25 +361,33 @@ useEffect(() => {
     const { defectCategory, defectCode, quantity, defectLocation } = newDefect;
     const enteredQuantity = Number(quantity);
     const maxDefectQuantity = Number(formData.defectQuantity);
-
+  
     // Basic validation
     if (!defectCategory || !defectCode || !quantity || !defectLocation) {
       toast.error("All fields for defect entry are required.");
       return;
     }
-
+  
+    if (!formData.locationCategory) {
+      toast.error("Please select a location category first.");
+      return;
+    }
+  
     // Validate that individual quantity doesn't exceed max defect quantity
     if (enteredQuantity > maxDefectQuantity) {
       toast.error(`Individual defect quantity cannot exceed the total defect quantity (${maxDefectQuantity}).`);
       return;
     }
-
+  
     // Validate that quantity is a positive number
     if (enteredQuantity <= 0) {
       toast.error("Defect quantity must be greater than 0.");
       return;
     }
-
+  
+    // Lock the location category after first entry
+    setIsLocationCategoryLocked(true);
+  
     setFormData((prevData) => ({
       ...prevData,
       defectEntries: [
@@ -387,15 +396,16 @@ useEffect(() => {
           id: Date.now(),
           defectCategory, 
           defectCode, 
-          quantity: enteredQuantity ,
+          quantity: enteredQuantity,
           locationCategory: prevData.locationCategory,
           defectLocation
         },
       ],
     }));
-
-    setNewDefect({ defectCategory: "", defectCode: "", quantity: "",defectLocation: "" });
+  
+    setNewDefect({ defectCategory: "", defectCode: "", quantity: "", defectLocation: "" });
   };
+  
 
     // Remove a defect entry
     const removeDefectEntry = (index) => {
@@ -534,7 +544,7 @@ useEffect(() => {
         }
     
         toast.success("Form submitted successfully!");
-    
+        
         // Clear form data
         setFormData({
           plant: "",
@@ -561,6 +571,7 @@ useEffect(() => {
     
         // Clear defect photos
         setDefectPhotos({});
+        setIsLocationCategoryLocked(false);
         
         // Clear errors
         setErrors({});
@@ -650,11 +661,12 @@ useEffect(() => {
             </motion.div>
             <motion.div variants={itemVariants}>
   <Dropdown
-    label="Location Category"
+    label="6.Category"
     options={locationCategories}
     value={formData.locationCategory}
     onChange={(value) => handleChange("locationCategory", value)}
     error={errors.locationCategory}
+    disabled={isLocationCategoryLocked}
   />
 </motion.div>
             {formData.customer && (
@@ -683,7 +695,7 @@ useEffect(() => {
             )}
             <motion.div variants={itemVariants}>
   <label className="block text-sm font-medium text-gray-700 mb-2">
-    6. Inspected Quantity
+    7. Inspected Quantity
   </label>
   <div className="flex space-x-4">
     {[20, 32].map((quantity) => (
@@ -712,7 +724,15 @@ useEffect(() => {
     <p className="text-sm text-red-600 mt-1">{errors.inspectedQuantity}</p>
   )}
 </motion.div>
-
+<motion.div variants={itemVariants}>
+              <InputField
+                label="8. Defect Quantity"
+                type="number"
+                value={formData.defectQuantity}
+                onChange={(value) => handleChange("defectQuantity", value)}
+                error={errors.defectQuantity}
+              />
+            </motion.div>
             <motion.div variants={itemVariants}>
               <InputField
                 label="Remarks"
@@ -722,15 +742,7 @@ useEffect(() => {
                 error={errors.remarks}
               />
             </motion.div>
-            <motion.div variants={itemVariants}>
-              <InputField
-                label="7. Defect Quantity"
-                type="number"
-                value={formData.defectQuantity}
-                onChange={(value) => handleChange("defectQuantity", value)}
-                error={errors.defectQuantity}
-              />
-            </motion.div>
+           
             {/* <motion.div variants={itemVariants}>
               <UploadPhotos
                 label="Upload Photos"
