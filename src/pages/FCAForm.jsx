@@ -481,7 +481,8 @@ useEffect(() => {
           defectCategory: entry.defectCategory,
           defectCode: entry.defectCode,
           quantity: Number(entry.quantity),
-          photos: entry.photos || []
+          locationCategory: entry.locationCategory || formData.locationCategory,
+          defectLocation: entry.defectLocation
         }));
     
         const submissionData = {
@@ -515,37 +516,39 @@ useEffect(() => {
     
         // Upload photos for each defect if they exist
         if (Object.keys(defectPhotos).length > 0) {
-          const photoUploadPromises = Object.entries(defectPhotos).map(async ([defectIndex, photos]) => {
-            const defectId = defectIds[defectIndex]?.Id;
-            if (!defectId) {
-              console.warn(`No defect ID found for index ${defectIndex}`);
-              return;
-            }
+          await Promise.all(
+            Object.entries(defectPhotos).map(async ([defectIndex, photos]) => {
+              const defectId = defectIds[defectIndex]?.Id;
+              if (!defectId) {
+                console.warn(`No defect ID found for index ${defectIndex}`);
+                return;
+              }
     
-            return Promise.all(
-              photos.map(async (photo) => {
-                try {
-                  const formData = new FormData();
-                  formData.append('photo', photo);
-                  formData.append('auditId', auditId.toString());
-                  formData.append('defectId', defectId.toString());
-                  
-                  return await addDefectPhoto(formData);
-                } catch (photoError) {
-                  console.error('Error uploading photo:', photoError);
-                  toast.error(`Failed to upload photo: ${photo.name}`);
-                  return null;
-                }
-              })
-            );
-          });
-    
-          await Promise.all(photoUploadPromises);
+              return Promise.all(
+                photos.map(async (photo) => {
+                  try {
+                    const formData = new FormData();
+                    formData.append('photo', photo);
+                    formData.append('auditId', auditId.toString());
+                    formData.append('defectId', defectId.toString());
+                    
+                    const uploadResponse = await addDefectPhoto(formData);
+                    if (!uploadResponse.ok) {
+                      throw new Error(`Failed to upload photo: ${uploadResponse.statusText}`);
+                    }
+                  } catch (photoError) {
+                    console.error('Error uploading photo:', photoError);
+                    toast.error(`Failed to upload photo for defect ${defectIndex + 1}`);
+                  }
+                })
+              );
+            })
+          );
         }
     
         toast.success("Form submitted successfully!");
         
-        // Clear form data
+        // Reset form and state
         setFormData({
           plant: "",
           module: "",
@@ -569,11 +572,9 @@ useEffect(() => {
           type: "Inline",
         });
     
-        // Clear defect photos
+        // Clear defect photos and location category lock
         setDefectPhotos({});
         setIsLocationCategoryLocked(false);
-        
-        // Clear errors
         setErrors({});
     
       } catch (error) {
@@ -581,7 +582,6 @@ useEffect(() => {
         toast.error(error.message || "There was an error submitting the form.");
       }
     };
-  
     
     return (
       <motion.div
