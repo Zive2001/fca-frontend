@@ -199,7 +199,7 @@ export const addDefectPhoto = async (formData) => {
       });
       return response.data;
   } catch (error) {
-      console.error('Error uploading defect photo:', error.response?.data || error.message);
+      console.error('Error uploading defect photo:', error.response?.data || error);
       throw new Error(error.response?.data?.error || 'Failed to upload photo');
   }
 };

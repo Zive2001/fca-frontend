@@ -469,7 +469,7 @@ useEffect(() => {
       const formErrors = validateForm();
       if (Object.keys(formErrors).length > 0) {
         setErrors(formErrors);
-        Object.values(formErrors).forEach((error) => toast.error(error));
+        // Object.values(formErrors).forEach((error) => toast.error(error));
         return;
       }
     };
