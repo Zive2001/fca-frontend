@@ -291,25 +291,25 @@ useEffect(() => {
     // Load defect codes based on selected defect category
     useEffect(() => {
       if (newDefect.defectCategory) {
-          const loadDefectCodes = async () => {
-              try {
-                  const codeData = await fetchDefectCodes(newDefect.defectCategory);
-                  const formattedCodes = codeData.map((item) => ({
-                      id: item.UnqId,
-                      label: item.Combined_Defect, // Changed from Defect_Code
-                      value: item.Combined_Defect, // Changed from Defect_Code
-                  }));
-                  setDefectCodes(formattedCodes);
-              } catch (error) {
-                  console.error("Error fetching defect codes:", error);
-              }
-          };
-          loadDefectCodes();
+        const loadDefectCodes = async () => {
+          try {
+            const codeData = await fetchDefectCodes(newDefect.defectCategory);
+            const formattedCodes = codeData.map((item) => ({
+              id: item.UnqId,
+              label: item.Combined_Defect,
+              value: item.Combined_Defect,
+            }));
+            setDefectCodes(formattedCodes);
+          } catch (error) {
+            console.error("Error fetching defect codes:", error);
+          }
+        };
+        loadDefectCodes();
       } else {
-          setDefectCodes([]);
+        setDefectCodes([]);
       }
-  }, [newDefect.defectCategory]);
-
+    }, [newDefect.defectCategory]);
+  
   // Add new useEffect for loading location categories
 useEffect(() => {
   const loadLocationCategories = async () => {
@@ -803,15 +803,29 @@ useEffect(() => {
           }
           error={errors.defectCategory}
         />
-        <Dropdown
-          label="Defect Code"
+        <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Defect Code
+        </label>
+        <Select
           options={defectCodes}
-          value={newDefect.defectCode}
-          onChange={(value) =>
-            setNewDefect((prev) => ({ ...prev, defectCode: value }))
+          value={defectCodes.find(code => code.value === newDefect.defectCode) || null}
+          onChange={(selectedOption) =>
+            setNewDefect((prev) => ({
+              ...prev,
+              defectCode: selectedOption?.value || ""
+            }))
           }
-          error={errors.defectCode}
+          placeholder="Search Code"
+          isSearchable
+          className="basic-single"
+          classNamePrefix="select"
+          isDisabled={!newDefect.defectCategory}
         />
+        {errors.defectCode && (
+          <span className="text-red-500 text-sm">{errors.defectCode}</span>
+        )}
+      </div>
         <Dropdown
           label="Defect Location"
           options={defectLocations}
