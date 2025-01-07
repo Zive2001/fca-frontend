@@ -816,7 +816,7 @@ useEffect(() => {
               defectCode: selectedOption?.value || ""
             }))
           }
-          placeholder="Search Code"
+          placeholder="Search Code  "
           isSearchable
           className="basic-single"
           classNamePrefix="select"
