@@ -481,6 +481,8 @@ useEffect(() => {
           defectCategory: entry.defectCategory,
           defectCode: entry.defectCode,
           quantity: Number(entry.quantity),
+          locationCategory: formData.locationCategory, // Add this
+  defectLocation: entry.defectLocation, 
           photos: entry.photos || []
         }));
     
