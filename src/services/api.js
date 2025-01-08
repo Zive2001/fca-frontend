@@ -255,3 +255,53 @@ export const fetchDefectLocations = async (category) => {
     return [];
   }
 };
+
+// Update these functions in your api.js file
+export const fetchEmailRecipients = async (plantId) => {
+  try {
+    const response = await axios.get(`${API_URL}/email/recipients/${plantId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching email recipients:', error);
+    throw error; // Throw the actual error for better debugging
+  }
+};
+
+export const sendFailureNotification = async (data) => {
+  try {
+    // If you need to send files, use FormData
+    if (data.defectPhotos && Object.keys(data.defectPhotos).length > 0) {
+      const formData = new FormData();
+      
+      // Add all the non-file data
+      formData.append('emailData', JSON.stringify({
+        plant: data.plant,
+        formData: data.formData,
+        auditId: data.auditId,
+        defectEntries: data.defectEntries
+      }));
+
+      // Add photos with proper naming
+      Object.entries(data.defectPhotos).forEach(([defectIndex, photos]) => {
+        photos.forEach((photo, photoIndex) => {
+          formData.append('photos', photo, 
+            `defect_${defectIndex}_photo_${photoIndex}.jpg`);
+        });
+      });
+
+      const response = await axios.post(`${API_URL}/send-notification`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      return response.data;
+    } else {
+      // If no files, send as regular JSON
+      const response = await axios.post(`${API_URL}/send-notification`, data);
+      return response.data;
+    }
+  } catch (error) {
+    console.error('Error sending email notification:', error);
+    throw error; // Throw the actual error for better debugging
+  }
+};

@@ -4,6 +4,8 @@ import Dropdown from "../components/Dropdown";
 import InputField from "../components/InputField";
 import ConfirmSubmissionDialog from "../components/ConfirmSubmissionDialog";
 import Button from "../components/Button";
+import EmailNotificationHandler from '../components/EmailNotificationHandler';
+import { sendEmailNotification } from '../utils/emailNotificationUtil';
 
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -23,6 +25,8 @@ import {
   fetchStyles,
   fetchCustomerColor,
   fetchCustomerColorDesc,
+  fetchEmailRecipients,
+  sendFailureNotification,
   submitFCAData,
   fetchDefectLocations,
   fetchLocationCategories,
@@ -481,8 +485,8 @@ useEffect(() => {
           defectCategory: entry.defectCategory,
           defectCode: entry.defectCode,
           quantity: Number(entry.quantity),
-          locationCategory: formData.locationCategory, // Add this
-  defectLocation: entry.defectLocation, 
+          locationCategory: formData.locationCategory,
+          defectLocation: entry.defectLocation,
           photos: entry.photos || []
         }));
     
@@ -543,6 +547,22 @@ useEffect(() => {
           });
     
           await Promise.all(photoUploadPromises);
+        }
+    
+        // Send email notification if status is "Fail"
+        if (formData.status === "Fail" && response.auditId) {
+          try {
+            await sendFailureNotification({
+              plant: formData.plant,
+              formData: formData,
+              defectPhotos: defectPhotos,
+              auditId: response.auditId,
+              defectEntries: formData.defectEntries
+            });
+          } catch (emailError) {
+            console.error("Error sending email notification:", emailError);
+            toast.warning("Form submitted successfully, but there was an error sending the email notification.");
+          }
         }
     
         toast.success("Form submitted successfully!");
