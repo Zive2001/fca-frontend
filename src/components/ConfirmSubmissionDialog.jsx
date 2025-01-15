@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
 import { toast } from 'react-toastify';
+import { XMarkIcon } from "@heroicons/react/24/outline";
+import FailureReport from './FailureReport';
 
-const ConfirmSubmissionDialog = ({ onConfirm, validateForm }) => {
+const ConfirmSubmissionDialog = ({ onConfirm, validateForm, formData }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [showFailureReport, setShowFailureReport] = useState(false);
 
   const handleConfirm = () => {
     onConfirm();
@@ -13,7 +16,6 @@ const ConfirmSubmissionDialog = ({ onConfirm, validateForm }) => {
     const formErrors = validateForm();
     
     if (Object.keys(formErrors).length > 0) {
-      // Show all validation errors
       Object.values(formErrors).forEach((error) => {
         toast.error(error);
       });
@@ -25,7 +27,6 @@ const ConfirmSubmissionDialog = ({ onConfirm, validateForm }) => {
 
   return (
     <>
-      {/* Submit Button */}
       <button
         onClick={handleOpenDialog}
         className="bg-gray-900 hover:bg-gray-800 text-white font-semibold px-6 py-2 rounded-lg shadow-md transition-all duration-200 ease-in-out transform hover:scale-[1.02] active:scale-[0.98]"
@@ -33,29 +34,22 @@ const ConfirmSubmissionDialog = ({ onConfirm, validateForm }) => {
         Submit
       </button>
 
-      {/* Modal Backdrop */}
       {isOpen && (
         <div className="fixed inset-0 z-50 overflow-y-auto">
           <div className="flex min-h-screen items-center justify-center p-4">
-            {/* Overlay */}
             <div 
               className="fixed inset-0 bg-black/50 transition-opacity" 
               onClick={() => setIsOpen(false)}
             />
 
-            {/* Modal */}
             <div className="relative w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left shadow-xl transition-all">
-              {/* Close button */}
               <button
                 onClick={() => setIsOpen(false)}
                 className="absolute right-4 top-4 text-gray-400 hover:text-gray-500 focus:outline-none"
               >
-                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
+                <XMarkIcon className="h-6 w-6" />
               </button>
 
-              {/* Content */}
               <div className="mt-2">
                 <h3 className="text-xl font-semibold text-gray-900">
                   Confirm Submission
@@ -65,7 +59,20 @@ const ConfirmSubmissionDialog = ({ onConfirm, validateForm }) => {
                 </p>
               </div>
 
-              {/* Actions */}
+              {formData?.defectRate > 5 && (
+                <div className="mt-4 p-3 bg-red-50 rounded-lg">
+                  <p className="text-red-700 text-sm">
+                    This inspection has failed. Would you like to generate a failure report?
+                  </p>
+                  <button
+                    onClick={() => setShowFailureReport(true)}
+                    className="mt-2 text-sm font-medium text-red-600 hover:text-red-500"
+                  >
+                    Generate Failure Report
+                  </button>
+                </div>
+              )}
+
               <div className="mt-6 flex justify-end space-x-3">
                 <button
                   onClick={() => setIsOpen(false)}
@@ -84,6 +91,12 @@ const ConfirmSubmissionDialog = ({ onConfirm, validateForm }) => {
           </div>
         </div>
       )}
+
+      <FailureReport
+        data={formData}
+        isOpen={showFailureReport}
+        onClose={() => setShowFailureReport(false)}
+      />
     </>
   );
 };

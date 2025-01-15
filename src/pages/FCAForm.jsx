@@ -896,6 +896,7 @@ useEffect(() => {
             <ConfirmSubmissionDialog 
   onConfirm={handleConfirmedSubmit} 
   validateForm={validateForm}
+  formData={formData}
 />
 </div>
           </div>
