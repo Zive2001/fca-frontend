@@ -1,10 +1,17 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { XMarkIcon, DocumentDuplicateIcon, ArrowDownTrayIcon } from "@heroicons/react/24/outline";
 import { toast } from 'react-toastify';
 import html2canvas from 'html2canvas';
 
 const FailureReport = ({ data, isOpen, onClose }) => {
   if (!isOpen) return null;
+
+  // Generate a unique ID for this report instance
+  const reportId = useMemo(() => {
+    const randomPart = Math.random().toString(36).substring(2, 8).toUpperCase();
+    const timestamp = Date.now().toString().slice(-6);
+    return `${randomPart}${timestamp}`;
+  }, []);
 
   const handleDownload = async () => {
     const element = document.getElementById('failure-report');
@@ -13,8 +20,18 @@ const FailureReport = ({ data, isOpen, onClose }) => {
       const image = canvas.toDataURL('image/png');
       const link = document.createElement('a');
       link.href = image;
-      link.download = `FCA_Failure_Report_${data.po}.png`;
+      
+      // Format current date
+      const today = new Date();
+      const dateStr = today.toISOString().split('T')[0]; // YYYY-MM-DD format
+      
+      // Create filename with date, PO, and unique ID
+      const filename = `FCA_Failure_Report_${data.po}_${dateStr}_ID${reportId}.png`;
+      
+      link.download = filename;
       link.click();
+      
+      toast.success(`Report saved as: ${filename}`);
     } catch (error) {
       console.error('Error generating image:', error);
       toast.error('Failed to download report');
@@ -37,7 +54,10 @@ const FailureReport = ({ data, isOpen, onClose }) => {
             <h1 className="text-lg font-semibold text-gray-900 truncate">
               Quality Control Report
             </h1>
-            <p className="text-sm text-gray-500">Generated {new Date().toLocaleDateString()}</p>
+            <div className="flex items-center space-x-4">
+              <p className="text-sm text-gray-500">Generated {new Date().toLocaleDateString()}</p>
+              <p className="text-sm text-gray-500">ID: {reportId}</p>
+            </div>
           </div>
           <div className="flex items-center space-x-2">
             <button
@@ -63,7 +83,7 @@ const FailureReport = ({ data, isOpen, onClose }) => {
           </div>
         </div>
 
-        {/* Scrollable Content */}
+        {/* Rest of the component remains the same */}
         <div className="p-4" id="failure-report">
           {/* Alert Banner */}
           <div className="bg-red-50 border-l-4 border-red-600 p-4 mb-4 rounded">
