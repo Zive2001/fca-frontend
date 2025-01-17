@@ -550,20 +550,20 @@ useEffect(() => {
         }
     
         // Send email notification if status is "Fail"
-        if (formData.status === "Fail" && response.auditId) {
-          try {
-            await sendFailureNotification({
-              plant: formData.plant,
-              formData: formData,
-              defectPhotos: defectPhotos,
-              auditId: response.auditId,
-              defectEntries: formData.defectEntries
-            });
-          } catch (emailError) {
-            console.error("Error sending email notification:", emailError);
-            toast.warning("Form submitted successfully, but there was an error sending the email notification.");
-          }
-        }
+        // if (formData.status === "Fail" && response.auditId) {
+        //   try {
+        //     await sendFailureNotification({
+        //       plant: formData.plant,
+        //       formData: formData,
+        //       defectPhotos: defectPhotos,
+        //       auditId: response.auditId,
+        //       defectEntries: formData.defectEntries
+        //     });
+        //   } catch (emailError) {
+        //     console.error("Error sending email notification:", emailError);
+        //     toast.warning("Form submitted successfully, but there was an error sending the email notification.");
+        //   }
+        // }
     
         toast.success("Form submitted successfully!");
         
