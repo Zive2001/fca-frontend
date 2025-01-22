@@ -7,7 +7,6 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { 
   getFCAData, 
-  updateFCAData, 
   deleteFCAData, 
   fetchPlants, 
   fetchModules,
@@ -33,7 +32,6 @@ const Admin = () => {
   const [modules, setModules] = useState([]);
   const [pos, setPOs] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [editingRecord, setEditingRecord] = useState(null);
   const [poFilter, setPOFilter] = useState("");
 
   // Fetch dropdown data
@@ -95,17 +93,26 @@ const Admin = () => {
     try {
       const result = await getFCAData({
         ...filters,
-        po: poFilter || filters.po // Use poFilter if available
+        po: poFilter
       });
-      // Sort data by submission date in descending order
-      const sortedData = {
-        ...result,
-        data: result.data.sort((a, b) => 
-          new Date(b.SubmissionDate) - new Date(a.SubmissionDate)
-        )
-      };
-      setData(sortedData);
-      if (!result.data.length) {
+      
+      // Filter by PO if search text exists
+      let filteredData = result.data;
+      if (poFilter) {
+        filteredData = result.data.filter(record => 
+          record.PO.toLowerCase().includes(poFilter.toLowerCase())
+        );
+      }
+      
+      // Sort by submission date (newest first)
+      filteredData.sort((a, b) => new Date(b.SubmissionDate) - new Date(a.SubmissionDate));
+      
+      setData({
+        total: filteredData.length,
+        data: filteredData
+      });
+      
+      if (!filteredData.length) {
         toast.info("No records found.");
       }
     } catch (error) {
@@ -127,43 +134,6 @@ const Admin = () => {
     }));
   };
 
-  const handleEdit = (record) => {
-    setEditingRecord({
-      ...record,
-      defects: record.defects || []
-    });
-  };
-
-  const handleUpdate = async () => {
-    try {
-      if (!editingRecord) return;
-      
-      await updateFCAData(editingRecord.Id, {
-        plant: editingRecord.Plant,
-        module: editingRecord.Module,
-        shift: editingRecord.Shift,
-        po: editingRecord.PO,
-        size: editingRecord.Size,
-        customer: editingRecord.Customer,
-        style: editingRecord.Style,
-        inspectedQuantity: editingRecord.InspectedQuantity,
-        defectQuantity: editingRecord.DefectQuantity,
-        status: editingRecord.Status,
-        defectRate: editingRecord.DefectRate,
-        
-        remarks: editingRecord.Remarks,
-        type: editingRecord.Type,
-        defects: editingRecord.defects
-      });
-      
-      toast.success("Record updated successfully.");
-      setEditingRecord(null);
-      fetchData();
-    } catch (error) {
-      toast.error("Error updating record: " + error.message);
-    }
-  };
-
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this record?")) {
       try {
@@ -176,78 +146,13 @@ const Admin = () => {
     }
   };
 
-  const renderEditModal = () => {
-    if (!editingRecord) return null;
-
-    return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-        <div className="bg-white p-6 rounded-lg w-full max-w-2xl">
-          <h2 className="text-xl font-bold mb-4">Edit Record</h2>
-          
-          <div className="grid grid-cols-2 gap-4">
-            <InputField
-              label="Plant"
-              value={editingRecord.Plant}
-              onChange={e => setEditingRecord({...editingRecord, Plant: e.target.value})}
-            />
-            <InputField
-              label="Module"
-              value={editingRecord.Module}
-              onChange={e => setEditingRecord({...editingRecord, Module: e.target.value})}
-            />
-            <InputField
-              label="PO"
-              value={editingRecord.PO}
-              onChange={e => setEditingRecord({...editingRecord, PO: e.target.value})}
-            />
-            <InputField
-              label="Size"
-              value={editingRecord.Size}
-              onChange={e => setEditingRecord({...editingRecord, Size: e.target.value})}
-            />
-            <InputField
-              label="Type"
-              value={editingRecord.Type}
-              onChange={e => setEditingRecord({...editingRecord, Type: e.target.value})}
-            />
-            <InputField
-              label="Inspected Quantity"
-              type="number"
-              value={editingRecord.InspectedQuantity}
-              onChange={e => setEditingRecord({...editingRecord, InspectedQuantity: e.target.value})}
-            />
-            <InputField
-              label="Defect Quantity"
-              type="number"
-              value={editingRecord.DefectQuantity}
-              onChange={e => setEditingRecord({...editingRecord, DefectQuantity: e.target.value})}
-            />
-          </div>
-
-          <div className="mt-4 flex justify-end space-x-2">
-            <Button 
-              label="Cancel" 
-              onClick={() => setEditingRecord(null)} 
-              variant="secondary"
-            />
-            <Button 
-              label="Save" 
-              onClick={handleUpdate} 
-              variant="primary"
-            />
-          </div>
-        </div>
-      </div>
-    );
-  };
-
   return (
     <motion.div 
       initial={{ opacity: 0 }} 
       animate={{ opacity: 1 }} 
       className="p-6"
     >
-      <h1 className="text-2xl font-bold mb-6 text-center">Admin Panel</h1>
+      <h1 className="text-2xl font-bold mb-6 text-center">View FCA Data</h1>
 
       {/* Filters */}
       <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-6">
@@ -313,6 +218,7 @@ const Admin = () => {
             <table className="min-w-full border-collapse border border-gray-200">
               <thead>
                 <tr className="bg-gray-100">
+                  <th className="p-2 border border-gray-300">ID</th>
                   <th className="p-2 border border-gray-300">Plant</th>
                   <th className="p-2 border border-gray-300">Module</th>
                   <th className="p-2 border border-gray-300">PO</th>
@@ -324,12 +230,13 @@ const Admin = () => {
                   <th className="p-2 border border-gray-300">Defect Qty</th>
                   <th className="p-2 border border-gray-300">Status</th>
                   <th className="p-2 border border-gray-300">Submission Date</th>
-                  <th className="p-2 border border-gray-300">Actions</th>
+                  <th className="p-2 border border-gray-300">Action</th>
                 </tr>
               </thead>
               <tbody>
                 {data.data.map((record) => (
                   <tr key={record.Id}>
+                    <td className="p-2 border border-gray-300">{record.Id}</td>
                     <td className="p-2 border border-gray-300">{record.Plant}</td>
                     <td className="p-2 border border-gray-300">{record.Module}</td>
                     <td className="p-2 border border-gray-300">{record.PO}</td>
@@ -344,18 +251,11 @@ const Admin = () => {
                       {new Date(record.SubmissionDate).toLocaleString()}
                     </td>
                     <td className="p-2 border border-gray-300">
-                      <div className="flex space-x-2">
-                        <Button 
-                          label="Edit" 
-                          onClick={() => handleEdit(record)} 
-                          variant="secondary"
-                        />
-                        <Button 
-                          label="Delete" 
-                          onClick={() => handleDelete(record.Id)} 
-                          variant="danger"
-                        />
-                      </div>
+                      <Button 
+                        label="Delete" 
+                        onClick={() => handleDelete(record.Id)} 
+                        variant="danger"
+                      />
                     </td>
                   </tr>
                 ))}
@@ -390,9 +290,6 @@ const Admin = () => {
       ) : (
         <p className="text-center text-gray-600">No data found.</p>
       )}
-
-      {/* Edit Modal */}
-      {renderEditModal()}
     </motion.div>
   );
 };
