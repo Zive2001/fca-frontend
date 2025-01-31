@@ -1,7 +1,13 @@
 import axios from "axios";
 
 // Base API URL
-export const API_URL = "http://localhost:5001/api/fca";
+
+//export const API_URL = "https://sg-prod-bdyapp-fcatesting.azurewebsites.net/api/fca";
+//export const API_URL = "http://localhost:8080/api/fca";
+export const API_URL = process.env.NODE_ENV === 'production' 
+    ? "https://sg-prod-bdyapp-fcatest.azurewebsites.net/api/fca"
+    : "http://localhost:8080/api/fca";
+
 
 // Plant and Module APIs
 export const fetchPlants = async () => {
