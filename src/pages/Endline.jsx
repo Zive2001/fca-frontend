@@ -612,8 +612,8 @@ useEffect(() => {
         animate="visible"
         variants={containerVariants}
       >
-        <h1 className="text-2xl font-semibold mb-6 flex items-center">
-          <img src="/inlineicon2.svg" alt="Sewing Icon" className="w-6 h-6 mr-2" />
+        <h1 className="text-2xl font-semibold mb-6 flex items-center text-slate-950">
+          <img src="/sewing.png" alt="Sewing Icon" className="w-6 h-6 mr-2" />
           FCA Endline Form
         </h1>
         <p className="text-sm text-gray-600 font-semibold mb-6 translate-x-8 -translate-y-5">

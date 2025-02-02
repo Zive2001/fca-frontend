@@ -106,26 +106,34 @@ const LandingPage = () => {
         </motion.div>
 
         {/* Final Audit */}
-        <motion.div
-          whileHover={{ scale: 1.05 }}
-          className="bg-gray-800 rounded-xl overflow-hidden shadow-lg transform transition duration-300"
-        >
-          <Link to="/final-audit" className="block">
-            <div className="h-40 bg-gray-700 flex items-center justify-center">
-              <img
-                src="./mgr.svg" 
-                alt="Final Audit"
-                className="h-full object-cover"
-              />
-            </div>
-            <div className="p-6">
-              <h2 className="text-xl font-semibold mb-2 text-blue-400">
-                Final Audit
-              </h2>
-              <p className="text-gray-400">Manage final audits efficiently.</p>
-            </div>
-          </Link>
-        </motion.div>
+<motion.div
+  whileHover={{ scale: 1.02 }}
+  className="relative bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl overflow-hidden shadow-xl border border-gray-700/30 opacity-75"
+>
+  <div className="absolute inset-0 bg-grid-white/[0.05] pointer-events-none" />
+  <div className="block p-6">
+    <div className="relative h-40 flex items-center justify-center mb-4">
+      <div className="absolute inset-0 bg-blue-500/10 blur-2xl rounded-full" />
+      <img
+        src="./mgr.svg"
+        alt="Final Audit"
+        className="h-32 relative grayscale opacity-50"
+      />
+      <div className="absolute top-2 right-2">
+        <span className="px-3 py-1 text-xs font-medium text-blue-200/80 bg-blue-500/10 rounded-full border border-blue-200/10">
+          Coming Soon 🚀
+        </span>
+      </div>
+    </div>
+    <h2 className="text-xl font-semibold mb-2 text-gray-400">
+      Final Audit
+    </h2>
+    <p className="text-sm text-gray-500">
+     Final Audit module is under development. Stay tuned! ✨
+    </p>
+  </div>
+  <div className="absolute inset-0 pointer-events-none cursor-not-allowed" />
+</motion.div>
       </motion.section>
 
       {/* Footer */}
