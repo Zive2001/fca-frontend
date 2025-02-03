@@ -8,12 +8,12 @@ const CurrDate = () => {
       setDate(new Date());
     }, 1000);
 
-    return () => clearInterval(timer); // Cleanup interval on component unmount
+    return () => clearInterval(timer);
   }, []);
 
   return (
-    <div>
-      <p>Date: {date.toLocaleDateString()}</p>
+    <div className="text-sm text-gray-600">
+      <span>Date: {date.toLocaleDateString()}</span>
     </div>
   );
 };

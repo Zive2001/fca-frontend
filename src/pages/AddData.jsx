@@ -126,10 +126,10 @@ const AddData = () => {
           Ensure your Excel file has the following columns:
         </p>
         <ul className="text-gray-300 text-sm list-disc list-inside mt-2">
-          <li>Column 1: Name</li>
-          <li>Column 2: Age</li>
-          <li>Column 3: Department</li>
-          <li>Column 4: Date</li>
+          <li>Size Coloumn should be a merge of "Cup" and "Size" coulmns</li>
+          <li>"Sales_Order" and "Sewing_Order" Columns should not include numbers</li>
+          <li>If any error occured please drop a message at <a href="mailto:supunse@masholdings.com" className="text-blue-600 hover:text-blue-800 underline">supunse@masholdings.com</a> 🫤</li>
+          <li>Upload the newest line plan duplicate data will be replaced</li>
         </ul>
       </div>
 

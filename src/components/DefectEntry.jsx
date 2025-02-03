@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { TrashIcon, CameraIcon, XCircleIcon } from "@heroicons/react/24/solid";
-import { toast } from 'react-toastify';
+  import React, { useState } from 'react';
+  import { TrashIcon, CameraIcon, XCircleIcon } from "@heroicons/react/24/solid";
+  import { toast } from 'react-toastify';
 
 const DefectEntry = ({ entry, index, onRemove, onPhotosChange }) => {
   const [photos, setPhotos] = useState([]);
@@ -122,4 +122,4 @@ const DefectEntry = ({ entry, index, onRemove, onPhotosChange }) => {
   );
 };
 
-export default DefectEntry;
+  export default DefectEntry;
