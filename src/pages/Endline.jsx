@@ -3,6 +3,7 @@ import { color, motion } from "framer-motion";
 import Dropdown from "../components/Dropdown";
 import InputField from "../components/InputField";
 import ConfirmSubmissionDialog from "../components/ConfirmSubmissionDialog";
+import SubmissionSuccessDialog from "../components/SubmissionSuccessDialog";
 import Button from "../components/Button";
 import EmailNotificationHandler from '../components/EmailNotificationHandler';
 import { sendEmailNotification } from '../utils/emailNotificationUtil';
@@ -25,6 +26,7 @@ import {
   fetchStyles,
   fetchCustomerColor,
   fetchCustomerColorDesc,
+  fetchCPONumber,
   fetchEmailRecipients,
   sendFailureNotification,
   submitFCAData,
@@ -62,6 +64,8 @@ const FCAEndline = () => {
   const [locationCategories, setLocationCategories] = useState([]);
   const [defectLocations, setDefectLocations] = useState([]);
   const [isLocationCategoryLocked, setIsLocationCategoryLocked] = useState(false);
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+const [submittedAuditId, setSubmittedAuditId] = useState(null);
  
   const [formData, setFormData] = useState({
   plant: "",
@@ -73,6 +77,7 @@ const FCAEndline = () => {
   style: "",
   color: "",
   colorDesc: "",
+  cpoNumber: "",
   inspectedQuantity: "",
   defectQuantity: "",
   defectCategory: "",
@@ -270,6 +275,32 @@ useEffect(() => {
       ...prevData,
       color: "",
       colorDesc: "",
+    }));
+  }
+}, [formData.po]);
+
+
+useEffect(() => {
+  if (formData.po) {
+    const loadCPONumber = async () => {
+      try {
+        const cpoData = await fetchCPONumber(formData.po);
+        const selectedCPO = cpoData.length > 0 ? cpoData[0].CPO_Number : "";
+        setFormData((prevData) => ({
+          ...prevData,
+          cpoNumber: selectedCPO,
+        }));
+      } catch (error) {
+        console.error("Error loading CPO number:", error);
+        toast.error("Error loading CPO number");
+      }
+    };
+
+    loadCPONumber();
+  } else {
+    setFormData((prevData) => ({
+      ...prevData,
+      cpoNumber: "",
     }));
   }
 }, [formData.po]);
@@ -478,18 +509,11 @@ useEffect(() => {
       }
     };
     
+    // In FCAForm.jsx
+
     const handleConfirmedSubmit = async () => {
       try {
         // Prepare data for submission
-        const defectDetails = formData.defectEntries.map((entry) => ({
-          defectCategory: entry.defectCategory,
-          defectCode: entry.defectCode,
-          quantity: Number(entry.quantity),
-          locationCategory: formData.locationCategory,
-          defectLocation: entry.defectLocation,
-          photos: entry.photos || []
-        }));
-    
         const submissionData = {
           plant: formData.plant,
           module: formData.module,
@@ -500,9 +524,16 @@ useEffect(() => {
           style: formData.style,
           color: formData.color,
           colorDesc: formData.colorDesc,
+          cpoNumber: formData.cpoNumber,
           inspectedQuantity: Number(formData.inspectedQuantity),
           defectQuantity: Number(formData.defectQuantity),
-          defectDetails,
+          defectDetails: formData.defectEntries.map(entry => ({
+            defectCategory: entry.defectCategory,
+            defectCode: entry.defectCode,
+            quantity: Number(entry.quantity),
+            locationCategory: formData.locationCategory,
+            defectLocation: entry.defectLocation
+          })),
           status: formData.status,
           defectRate: formData.defectRate,
           remarks: formData.remarks,
@@ -517,56 +548,32 @@ useEffect(() => {
         }
     
         const auditId = response.auditId;
-        const defectIds = response.defects || [];
-    
+        
         // Upload photos for each defect if they exist
         if (Object.keys(defectPhotos).length > 0) {
-          const photoUploadPromises = Object.entries(defectPhotos).map(async ([defectIndex, photos]) => {
-            const defectId = defectIds[defectIndex]?.Id;
-            if (!defectId) {
-              console.warn(`No defect ID found for index ${defectIndex}`);
-              return;
-            }
+          const photoUploadPromises = [];
     
-            return Promise.all(
-              photos.map(async (photo) => {
-                try {
-                  const formData = new FormData();
-                  formData.append('photo', photo);
-                  formData.append('auditId', auditId.toString());
-                  formData.append('defectId', defectId.toString());
-                  
-                  return await addDefectPhoto(formData);
-                } catch (photoError) {
-                  console.error('Error uploading photo:', photoError);
-                  toast.error(`Failed to upload photo: ${photo.name}`);
-                  return null;
-                }
-              })
-            );
-          });
+          for (const [defectIndex, photos] of Object.entries(defectPhotos)) {
+            const defectId = response.defects[defectIndex]?.Id;
+            if (!defectId) continue;
+    
+            for (const photo of photos) {
+              const formData = new FormData();
+              formData.append('photo', photo.file);
+              formData.append('auditId', auditId.toString());
+              formData.append('defectId', defectId.toString());
+    
+              photoUploadPromises.push(addDefectPhoto(formData));
+            }
+          }
     
           await Promise.all(photoUploadPromises);
         }
     
-        // Send email notification if status is "Fail"
-        // if (formData.status === "Fail" && response.auditId) {
-        //   try {
-        //     await sendFailureNotification({
-        //       plant: formData.plant,
-        //       formData: formData,
-        //       defectPhotos: defectPhotos,
-        //       auditId: response.auditId,
-        //       defectEntries: formData.defectEntries
-        //     });
-        //   } catch (emailError) {
-        //     console.error("Error sending email notification:", emailError);
-        //     toast.warning("Form submitted successfully, but there was an error sending the email notification.");
-        //   }
-        // }
+        // Set the submitted audit ID for the success dialog
+        setSubmittedAuditId(auditId);
+        setShowSuccessDialog(true);
     
-        toast.success("Form submitted successfully!");
-        
         // Clear form data
         setFormData({
           plant: "",
@@ -578,10 +585,12 @@ useEffect(() => {
           style: "",
           color: "",
           colorDesc: "",
+          cpoNumber: "",
           inspectedQuantity: "",
           defectQuantity: "",
           defectCategory: "",
           defectCode: "",
+          quantity: "",
           defectEntries: [],
           locationCategory: "",
           remarks: "",
@@ -598,12 +607,15 @@ useEffect(() => {
         // Clear errors
         setErrors({});
     
+        // Return the response for ConfirmSubmissionDialog
+        return { auditId, status: 'success' };
+    
       } catch (error) {
         console.error("Error submitting form:", error);
         toast.error(error.message || "There was an error submitting the form.");
+        throw error;
       }
     };
-  
     
     return (
       <motion.div
@@ -612,149 +624,213 @@ useEffect(() => {
         animate="visible"
         variants={containerVariants}
       >
-        <h1 className="text-2xl font-semibold mb-6 flex items-center text-slate-950">
+        <h1 className="text-2xl font-semibold mb-6 flex items-center">
           <img src="/sewing.png" alt="Sewing Icon" className="w-6 h-6 mr-2" />
           FCA Endline Form
         </h1>
         <p className="text-sm text-gray-600 font-semibold mb-6 translate-x-8 -translate-y-5">
           <CurrDate />
         </p>
+        
         <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Left side fields */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative">
-            
-    
-            <motion.div variants={itemVariants}>
-              <Dropdown
-                label="1. Select Plant"
-                options={plants}
-                value={formData.plant}
-                onChange={(value) => handleChange("plant", value)}
-                error={errors.plant}
-              />
-            </motion.div>
-            <motion.div variants={itemVariants}>
-              <Dropdown
-                label="2. Select Module"
-                options={modules}
-                value={formData.module}
-                onChange={(value) => handleChange("module", value)}
-                error={errors.module}
-              />
-            </motion.div>
-            <motion.div variants={itemVariants}>
-              <Dropdown
-                label="3. Select Shift"
-                options={[
-                  { id: "A", label: "A", value: "A" },
-                  { id: "B", label: "B", value: "B" },
-                ]}
-                value={formData.shift}
-                onChange={(value) => handleChange("shift", value)}
-              />
-            </motion.div>
-            <motion.div variants={itemVariants}>
-            <label htmlFor="po-select" className="block text-sm font-medium text-gray-700 mb-1">
-    4. Select PO
-  </label>
-            <Select
-            
-  options={pos}
-  value={pos.find((po) => po.value === formData.po) || null}
-  onChange={(selectedOption) =>
-    handleChange("po", selectedOption?.value || "")
-  }
- 
-  placeholder="Search PO"
-  isSearchable
-/>
-  {errors.po && <span className="text-red-500">{errors.po}</span>}
-</motion.div>
+          {/* Left side fields - Reorganized */}
+          <div className="space-y-6">
+            {/* Main Input Section */}
+            <div className="grid grid-cols-2 gap-4">
+              <motion.div variants={itemVariants}>
+                <Dropdown
+                  label="1. Select Plant"
+                  options={plants}
+                  value={formData.plant}
+                  onChange={(value) => handleChange("plant", value)}
+                  error={errors.plant}
+                />
+              </motion.div>
+              <motion.div variants={itemVariants}>
+                <Dropdown
+                  label="2. Select Module"
+                  options={modules}
+                  value={formData.module}
+                  onChange={(value) => handleChange("module", value)}
+                  error={errors.module}
+                />
+              </motion.div>
+            </div>
+  
+            <div className="grid grid-cols-2 gap-4">
+              <motion.div variants={itemVariants}>
+                <Dropdown
+                  label="3. Select Shift"
+                  options={[
+                    { id: "A", label: "A", value: "A" },
+                    { id: "B", label: "B", value: "B" },
+                  ]}
+                  value={formData.shift}
+                  onChange={(value) => handleChange("shift", value)}
+                />
+              </motion.div>
+              <motion.div variants={itemVariants}>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  4. Select PO
+                </label>
+                <Select
+                  options={pos}
+                  value={pos.find((po) => po.value === formData.po) || null}
+                  onChange={(selectedOption) =>
+                    handleChange("po", selectedOption?.value || "")
+                  }
+                  placeholder="Search PO"
+                  isSearchable
+                />
+                {errors.po && <span className="text-red-500">{errors.po}</span>}
+              </motion.div>
+            </div>
+  
+            <div className="grid grid-cols-2 gap-4">
+              <motion.div variants={itemVariants}>
+                <Dropdown
+                  label="5. Select Size"
+                  options={sizes}
+                  value={formData.size}
+                  onChange={(value) => handleChange("size", value)}
+                  error={errors.size}
+                />
+              </motion.div>
+              <motion.div variants={itemVariants}>
+                <Dropdown
+                  label="6. Category"
+                  options={locationCategories}
+                  value={formData.locationCategory}
+                  onChange={(value) => handleChange("locationCategory", value)}
+                  error={errors.locationCategory}
+                  disabled={isLocationCategoryLocked}
+                />
+              </motion.div>
+            </div>
+  
+            {/* PO Details Card - Compact View */}
+            {(formData.cpoNumber || formData.customer || formData.style || formData.color || formData.colorDesc) && (
+              <motion.div variants={itemVariants} className="bg-gray-50 rounded-lg p-4">
+                <h3 className="text-sm font-bold text-gray-700 mb-2">PO Details</h3>
+                <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+                  {formData.cpoNumber && (
+                    <div>
+                      <span className="text-gray-500 font-semibold">VPO:</span>
+                      <span className="ml-2 text-gray-900">{formData.cpoNumber}</span>
+                    </div>
+                  )}
+                  {formData.customer && (
+                    <div>
+                      <span className="text-gray-500 font-semibold">Customer:</span>
+                      <span className="ml-2 text-gray-900">{formData.customer}</span>
+                    </div>
+                  )}
+                  {formData.style && (
+                    <div>
+                      <span className="text-gray-500 font-semibold">Style:</span>
+                      <span className="ml-2 text-gray-900">{formData.style}</span>
+                    </div>
+                  )}
+                  {formData.color && (
+                    <div>
+                      <span className="text-gray-500 font-semibold">Color:</span>
+                      <span className="ml-2 text-gray-900">{formData.color}</span>
+                    </div>
+                  )}
+                  {formData.colorDesc && (
+                    <div className="col-span-2">
+                      <span className="text-gray-500 font-semibold">Color Description:</span>
+                      <span className="ml-2 text-gray-900">{formData.colorDesc}</span>
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            )}
+  
+{/* Inspection Details Section */}
+<motion.div variants={itemVariants} className="bg-white rounded-lg border p-4">
+            <h3 className="text-md font-semibold mb-4">Inspection Details</h3>
+            <div className="space-y-4">
+              {/* First Row: Quantities */}
+              <div className="grid grid-cols-2 gap-6">
+                {/* Inspected Quantity */}
+                <div className="relative">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    7. Inspected Quantity
+                  </label>
+                  <div className="flex space-x-6 bg-gray-50 rounded-md p-2">
+                    {[20, 32].map((quantity) => (
+                      <div key={quantity} className="flex items-center">
+                        <input
+                          id={`quantity-${quantity}`}
+                          type="radio"
+                          name="inspectedQuantity"
+                          value={quantity}
+                          checked={formData.inspectedQuantity === quantity}
+                          onChange={(e) =>
+                            handleChange("inspectedQuantity", Number(e.target.value))
+                          }
+                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                        />
+                        <label
+                          htmlFor={`quantity-${quantity}`}
+                          className="ml-2 block text-sm font-medium text-gray-700"
+                        >
+                          {quantity} pcs
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                  {errors.inspectedQuantity && (
+                    <p className="text-sm text-red-600 mt-1">{errors.inspectedQuantity}</p>
+                  )}
+                </div>
 
+                {/* Defect Quantity */}
+                <div className="relative">
+                  <div className="w-36">
+                    <InputField
+                      label="8. Defect Quantity"
+                      type="number"
+                      value={formData.defectQuantity}
+                      onChange={(value) => handleChange("defectQuantity", value)}
+                      error={errors.defectQuantity}
+                    />
+                  </div>
+                </div>
+              </div>
 
-            <motion.div variants={itemVariants}>
-              <Dropdown
-                label="5. Select Size"
-                options={sizes}
-                value={formData.size}
-                onChange={(value) => handleChange("size", value)}
-                error={errors.size}
-              />
-            </motion.div>
-            <motion.div variants={itemVariants}>
-  <Dropdown
-    label="6.Category"
-    options={locationCategories}
-    value={formData.locationCategory}
-    onChange={(value) => handleChange("locationCategory", value)}
-    error={errors.locationCategory}
-    disabled={isLocationCategoryLocked}
-  />
-</motion.div>
-            {formData.customer && (
-              <motion.div variants={itemVariants}>
-                <label className="block text-sm font-medium text-gray-700">Customer</label>
-                <p className="mt-1 text-sm text-gray-800 bg-gray-100 rounded-md p-2">{formData.customer}</p>
-              </motion.div>
-            )}
-            {formData.style && (
-              <motion.div variants={itemVariants}>
-                <label className="block text-sm font-medium text-gray-700">Style</label>
-                <p className="mt-1 text-sm text-gray-800 bg-gray-100 rounded-md p-2">{formData.style}</p>
-              </motion.div>
-            )}
-            {formData.color && (
-              <motion.div variants={itemVariants}>
-                <label className="block text-sm font-medium text-gray-700">Color</label>
-                <p className="mt-1 text-sm text-gray-800 bg-gray-100 rounded-md p-2">{formData.color}</p>
-              </motion.div>
-            )}
-            {formData.colorDesc && (
-              <motion.div variants={itemVariants}>
-                <label className="block text-sm font-medium text-gray-700">Color Description</label>
-                <p className="mt-1 text-sm text-gray-800 bg-gray-100 rounded-md p-2">{formData.colorDesc}</p>
-              </motion.div>
-            )}
-            <motion.div variants={itemVariants}>
-  <label className="block text-sm font-medium text-gray-700 mb-2">
-    7. Inspected Quantity
-  </label>
-  <div className="flex space-x-4">
-    {[20, 32].map((quantity) => (
-      <div key={quantity} className="flex items-center">
-        <input
-          id={`quantity-${quantity}`}
-          type="radio"
-          name="inspectedQuantity"
-          value={quantity}
-          checked={formData.inspectedQuantity === quantity}
-          onChange={(e) =>
-            handleChange("inspectedQuantity", Number(e.target.value))
-          }
-          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
-        />
-        <label
-          htmlFor={`quantity-${quantity}`}
-          className="ml-2 block text-sm font-medium text-gray-700"
-        >
-          {quantity}
-        </label>
-      </div>
-    ))}
-  </div>
-  {errors.inspectedQuantity && (
-    <p className="text-sm text-red-600 mt-1">{errors.inspectedQuantity}</p>
-  )}
-</motion.div>
-<motion.div variants={itemVariants}>
-              <InputField
-                label="8. Defect Quantity"
-                type="number"
-                value={formData.defectQuantity}
-                onChange={(value) => handleChange("defectQuantity", value)}
-                error={errors.defectQuantity}
-              />
-            </motion.div>
+              {/* Second Row: Status and Rate */}
+              <div className="pt-2">
+                <div className="flex items-center space-x-6">
+                  {/* Status */}
+                  <div className="flex items-center space-x-2">
+                    <label className="text-sm font-medium text-gray-700">Status:</label>
+                    <div
+                      className={`inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium w-20 justify-normal  ${
+                        formData.defectRate <= 5 
+                          ? "bg-green-100 text-green-800 border border-green-200" 
+                          : "bg-red-100 text-red-800 border border-red-200"
+                      }`}
+                    >
+                      {formData.defectRate <= 5 ? "Pass" : "Fail"}
+                    </div>
+                  </div>
+
+                  {/* Defect Rate */}
+                  <div className="flex items-center space-x-2">
+                    <label className="text-sm font-medium text-gray-700">Defect Rate:</label>
+                    <div className="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium w-20 justify-normal bg-gray-100 text-gray-800 border border-gray-200">
+                      {formData.defectRate}%
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+
+  
+            {/* Remarks */}
             <motion.div variants={itemVariants}>
               <InputField
                 label="Remarks"
@@ -764,51 +840,7 @@ useEffect(() => {
                 error={errors.remarks}
               />
             </motion.div>
-           
-            {/* <motion.div variants={itemVariants}>
-              <UploadPhotos
-                label="Upload Photos"
-                photos={formData.photos}
-                onChange={(photos) => handleChange("photos", photos)}
-              />
-            </motion.div> */}
-            <div className="grid grid-cols-2 gap-4 mt-4">
-  {/* Status */}
-  <div className="flex flex-col">
-    <label className="text-sm font-semibold text-gray-700 mb-1">Status</label>
-    <div
-      className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-medium ${
-        formData.defectRate <= 5 ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
-      }`}
-    >
-      {formData.defectRate <= 5 ? "Pass" : "Fail"}
-    </div>
-  </div>
-
-  {/* Defect Rate */}
-  <div className="flex flex-col">
-    <label className="text-sm font-semibold text-gray-700 mb-1">Defect Rate</label>
-    <div
-      className="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-800"
-    >
-      {formData.defectRate}%
-    </div>
-  </div>
-</div>
-
-
-            
-            {/* <motion.div variants={itemVariants}>
-              <InputField
-                label="Remarks"
-                type="textarea"
-                value={formData.remarks}
-                onChange={(value) => handleChange("remarks", value)}
-                error={errors.remarks}
-              />
-            </motion.div> */}
           </div>
-    
           {/* Right side fields */}
           <div className="flex flex-col justify-between">
             <motion.div variants={itemVariants} className="border p-4 rounded">
@@ -901,6 +933,13 @@ useEffect(() => {
 </div>
           </div>
         </form>
+
+        <SubmissionSuccessDialog
+      isOpen={showSuccessDialog}
+      onClose={() => setShowSuccessDialog(false)}
+      auditId={submittedAuditId}
+      isFailureStatus={formData.defectRate > 5}
+    />
       </motion.div>
     );
     

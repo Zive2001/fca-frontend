@@ -1,17 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react';
 import { motion } from "framer-motion";
 import Dropdown from "../components/Dropdown";
 import InputField from "../components/InputField";
 import Button from "../components/Button";
 import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import { 
-  getFCAData, 
-  deleteFCAData, 
-  fetchPlants, 
-  fetchModules,
-  fetchPOs 
-} from "../services/api";
+import ConfirmDialog from "../components/ConfirmDialog";
+import { getFCAData, deleteFCAData, fetchPlants, fetchModules } from "../services/api";
 
 const Admin = () => {
   const [filters, setFilters] = useState({
@@ -30,9 +24,11 @@ const Admin = () => {
   const [data, setData] = useState({ total: 0, data: [] });
   const [plants, setPlants] = useState([]);
   const [modules, setModules] = useState([]);
-  const [pos, setPOs] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [poFilter, setPOFilter] = useState("");
+  const [deleteDialog, setDeleteDialog] = useState({ 
+    isOpen: false, 
+    recordId: null 
+  });
 
   // Fetch dropdown data
   useEffect(() => {
@@ -40,9 +36,9 @@ const Admin = () => {
       try {
         const plantData = await fetchPlants();
         setPlants(plantData.map((item) => ({ 
-          id: item.id, 
+          id: item.Production_Section, 
           label: item.Production_Section, 
-          value: item.id 
+          value: item.Production_Section 
         })));
       } catch (error) {
         toast.error("Error loading plants: " + error.message);
@@ -52,32 +48,14 @@ const Admin = () => {
   }, []);
 
   useEffect(() => {
-    if (filters.module) {
-      const loadPOs = async () => {
-        try {
-          const poData = await fetchPOs(filters.module);
-          setPOs(poData.map(po => ({
-            id: po,
-            label: po,
-            value: po
-          })));
-        } catch (error) {
-          toast.error("Error loading POs: " + error.message);
-        }
-      };
-      loadPOs();
-    }
-  }, [filters.module]);
-
-  useEffect(() => {
     if (filters.plant) {
       const loadModules = async () => {
         try {
           const moduleData = await fetchModules(filters.plant);
           setModules(moduleData.map((item) => ({ 
-            id: item.id, 
+            id: item.Sewing_work_center, 
             label: item.Sewing_work_center, 
-            value: item.id 
+            value: item.Sewing_work_center 
           })));
         } catch (error) {
           toast.error("Error loading modules: " + error.message);
@@ -91,28 +69,13 @@ const Admin = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const result = await getFCAData({
-        ...filters,
-        po: poFilter
-      });
-      
-      // Filter by PO if search text exists
-      let filteredData = result.data;
-      if (poFilter) {
-        filteredData = result.data.filter(record => 
-          record.PO.toLowerCase().includes(poFilter.toLowerCase())
-        );
-      }
-      
-      // Sort by submission date (newest first)
-      filteredData.sort((a, b) => new Date(b.SubmissionDate) - new Date(a.SubmissionDate));
-      
+      const result = await getFCAData(filters);
       setData({
-        total: filteredData.length,
-        data: filteredData
+        total: result.total,
+        data: result.data
       });
       
-      if (!filteredData.length) {
+      if (!result.data.length) {
         toast.info("No records found.");
       }
     } catch (error) {
@@ -123,8 +86,12 @@ const Admin = () => {
   };
 
   useEffect(() => {
-    fetchData();
-  }, [filters, poFilter]);
+    const debounceTimer = setTimeout(() => {
+      fetchData();
+    }, 300); // Debounce search
+
+    return () => clearTimeout(debounceTimer);
+  }, [filters]);
 
   const handleFilterChange = (name, value) => {
     setFilters(prev => ({
@@ -134,16 +101,21 @@ const Admin = () => {
     }));
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm("Are you sure you want to delete this record?")) {
-      try {
-        await deleteFCAData(id);
-        toast.success("Record deleted successfully.");
-        fetchData();
-      } catch (error) {
-        toast.error("Error deleting record: " + error.message);
-      }
+  const handleDelete = async () => {
+    if (!deleteDialog.recordId) return;
+    
+    try {
+      await deleteFCAData(deleteDialog.recordId);
+      toast.success("Record deleted successfully.");
+      setDeleteDialog({ isOpen: false, recordId: null });
+      fetchData(); // Refresh data after deletion
+    } catch (error) {
+      toast.error("Error deleting record: " + error.message);
     }
+  };
+
+  const openDeleteDialog = (id) => {
+    setDeleteDialog({ isOpen: true, recordId: id });
   };
 
   return (
@@ -176,8 +148,8 @@ const Admin = () => {
           <input
             type="text"
             className="w-full p-2 border rounded"
-            value={poFilter}
-            onChange={(e) => setPOFilter(e.target.value)}
+            value={filters.po}
+            onChange={(e) => handleFilterChange("po", e.target.value)}
             placeholder="Enter PO number"
           />
         </div>
@@ -253,7 +225,7 @@ const Admin = () => {
                     <td className="p-2 border border-gray-300">
                       <Button 
                         label="Delete" 
-                        onClick={() => handleDelete(record.Id)} 
+                        onClick={() => openDeleteDialog(record.Id)} 
                         variant="danger"
                       />
                     </td>
@@ -290,6 +262,15 @@ const Admin = () => {
       ) : (
         <p className="text-center text-gray-600">No data found.</p>
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={deleteDialog.isOpen}
+        onClose={() => setDeleteDialog({ isOpen: false, recordId: null })}
+        onConfirm={handleDelete}
+        title="Confirm Delete"
+        message="Are you sure you want to delete this record? This action cannot be undone."
+      />
     </motion.div>
   );
 };

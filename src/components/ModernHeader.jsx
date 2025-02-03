@@ -38,12 +38,7 @@ const ModernHeader = () => {
       description: 'Return to Main Page',
       path: '/'
     },
-    {
-      icon: ChartBarIcon,
-      label: 'View Data',
-      description: 'View added data',
-      path: '/view-data'
-    },
+    
     {
       icon: ClipboardDocumentListIcon,
       label: 'Inline Audit',
@@ -55,7 +50,13 @@ const ModernHeader = () => {
       label: 'Endline Audit',
       description: '',
       path: '/fca-endline'
-    }
+    },
+    {
+        icon: ChartBarIcon,
+        label: 'View Data',
+        description: 'View added data',
+        path: '/view-data'
+      }
   ];
 
   // Check if we're on landing or admin landing pages
