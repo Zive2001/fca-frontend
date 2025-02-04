@@ -7,7 +7,7 @@ import SubmissionSuccessDialog from "../components/SubmissionSuccessDialog";
 import Button from "../components/Button";
 import EmailNotificationHandler from '../components/EmailNotificationHandler';
 import { sendEmailNotification } from '../utils/emailNotificationUtil';
-
+import { useMsal } from "@azure/msal-react";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import CurrDate from '../components/CurrDate';
@@ -47,6 +47,8 @@ const itemVariants = {
 };
 
 const FCAForm = () => {
+  const { accounts } = useMsal();
+  const userEmail = accounts[0]?.username || '';  // This will get the logged-in user's email
   const [plants, setPlants] = useState([]);
   const [newDefect, setNewDefect] = useState({
     defectCategory: "",
@@ -90,6 +92,7 @@ const [submittedAuditId, setSubmittedAuditId] = useState(null);
   defectRate: 0,
   locationCategory: "",
   type: "Inline",
+  createdBy: userEmail
 });
 
   const [errors, setErrors] = useState({});
@@ -538,6 +541,7 @@ useEffect(() => {
           defectRate: formData.defectRate,
           remarks: formData.remarks,
           type: formData.type,
+          createdBy: userEmail
         };
     
         // Submit main form data
