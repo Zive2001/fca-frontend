@@ -8,37 +8,47 @@ const guideContent = {
     title: "User Guide",
     steps: [
       {
-        title: "Welcome to Our App",
-        description: "Learn how to make the most of our features with this quick guide for users.",
+        title: "Welcome to FCA App",
+        description: "Select relevant form based on your requirement ",
         image: "/welcome_slide.svg",
       },
       {
-        title: "Step 1: Setting Up Your Profile",
-        description: "Click on the profile icon in the top right corner. Fill in your basic information and add a profile picture to get started.",
-        image: "/api/placeholder/800/500",
+        title: "Step 1: Fill main form data",
+        description: "Click on the inline form button to navigate here. Defect quantity > 2 will trigger the failure status.",
+        image: "/form_data.svg",
       },
       {
-        title: "Step 2: Creating Your First Project",
-        description: "Click the '+ New Project' button on your dashboard. Give your project a name and select a template that suits your needs.",
-        image: "/api/placeholder/1200/800",
+        title: "Step 2: Find Po Details",
+        description: "Check whether the added details are valid for the selected PO before continuing.",
+        image: "/3.svg",
       },
       {
-        title: "Step 3: Collaborating with Team",
-        description: "Share your projects with team members by clicking the 'Share' button. You can set different access levels for each member.",
-        image: "/api/placeholder/1200/800",
+        title: "Step 3: Add Defect Entries",
+        description: "Remember to add at least one defect entry when defect quantity is greater than 0. And quantity should not exceed the defect quantity added firsthand.",
+        image: "/4.svg",
       },
       {
-        title: "Step 4: Using the Dashboard",
-        description: "Your dashboard shows all your active projects, recent activities, and important notifications. Click on any project to view its details.",
-        image: "/api/placeholder/1200/800",
-      }
+        title: "Step 4: Add Defect Entries Contd.",
+        description: "Once a defect entry is added, you cannot change the main form data",
+        image: "/5.svg",
+      },
+      {
+        title: "Step 5: Report Generation",
+        description: "Generate a report based on the data entered. The report will be available for download in view page as well.",
+        image: "/6.svg",
+      },
+      {
+        title: "Step 6: View Data",
+        description: "Your added data will be available for viewing in the view page. You can also download the report from here.",
+        image: "/7.svg",
+      },
     ]
   },
   admin: {
     title: "Admin Guide",
     steps: [
       {
-        title: "Welcome Administrator",
+        title: "Welcome to FCA App ",
         description: "This guide will help you understand the administrative features and responsibilities.",
         image: "/api/placeholder/1200/800",
       },
@@ -48,17 +58,17 @@ const guideContent = {
         image: "/api/placeholder/1200/800",
       },
       {
-        title: "Step 2: User Management",
+        title: "Step 2: Add Po Master Data",
         description: "Access the User Management panel to create, edit, or deactivate user accounts. You can also manage roles and permissions for different user groups.",
         image: "/api/placeholder/1200/800",
       },
       {
-        title: "Step 3: System Configuration",
+        title: "Step 3: Manage Added Data",
         description: "Configure system-wide settings, integrate third-party services, and manage API keys through the Configuration panel.",
         image: "/api/placeholder/1200/800",
       },
       {
-        title: "Step 4: Analytics & Reporting",
+        title: "Step 4: Manage Emails",
         description: "Generate detailed reports on system usage, user activity, and performance metrics. Export data in various formats for further analysis.",
         image: "/api/placeholder/1200/800",
       }
@@ -100,7 +110,7 @@ const Guide = ({ role }) => {
               <motion.div
                 key={index}
                 className={`h-2 w-6 rounded-full cursor-pointer ${
-                  index === currentStep ? 'bg-blue-500' : 'bg-gray-200'
+                  index === currentStep ? 'bg-blue-900' : 'bg-gray-200'
                 }`}
                 whileHover={{ scale: 1.1 }}
                 onClick={() => setCurrentStep(index)}
@@ -170,7 +180,7 @@ const Guide = ({ role }) => {
             className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm ${
               currentStep === steps.length - 1
                 ? 'bg-gray-300 text-gray-600 cursor-not-allowed'
-                : 'bg-blue-500 text-white hover:bg-blue-600'
+                : 'bg-gray-900 text-white hover:bg-gray-800'
             }`}
           >
             Next
@@ -184,22 +194,22 @@ const Guide = ({ role }) => {
 
 const GetStartedGuides = () => {
   return (
-    <div className="max-w-6xl mx-auto p-4 md:p-6">
+    <div className="max-w-4xl mx-auto p-4 md:p-6">
       {/* Page Title */}
       <div className="text-center mb-8">
         <h1 className="text-4xl font-bold text-gray-900 mb-4">Getting Started Guides</h1>
         <p className="text-gray-600">Choose the guide that matches your role to get started</p>
       </div>
 
-      {/* Guides Container */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      {/* Guides Container - Now stacked vertically */}
+      <div className="space-y-8">
         {/* User Guide */}
-        <div className="lg:border-r lg:pr-8">
+        <div className="mb-8">
           <Guide role="user" />
         </div>
 
         {/* Admin Guide */}
-        <div className="lg:pl-8">
+        <div>
           <Guide role="admin" />
         </div>
       </div>
