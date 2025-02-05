@@ -2,8 +2,8 @@ import axios from "axios";
 
 // Base API URL
 
-//export const API_URL = "https://sg-prod-bdyapp-fcatesting.azurewebsites.net/api/fca";
-export const API_URL = "http://localhost:8080/api/fca";
+export const API_URL = "https://sg-prod-bdyapp-fcatest.azurewebsites.net/api/fca";
+//export const API_URL = "http://localhost:8080/api/fca";
 // Create axios instance with default config
 const axiosInstance = axios.create({
   baseURL: API_URL,
