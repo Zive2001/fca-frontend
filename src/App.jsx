@@ -24,8 +24,8 @@ import ModernHeader from "./components/ModernHeader";
 // MSAL configuration
 const msalConfig = {
   auth: {
-    clientId: "your-client-id",
-    authority: "https://login.microsoftonline.com/your-tenant-id",
+    clientId: "7569e108-ac80-4fde-b698-968962b13303",
+    authority: "https://login.microsoftonline.com/519f28ec-a14a-45a5-8697-409b75aeadca",
     redirectUri: window.location.origin,
   },
   cache: {
