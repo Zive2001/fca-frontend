@@ -171,12 +171,12 @@ const Admin = () => {
           value={filters.status}
           onChange={(value) => handleFilterChange("status", value)}
         />
-        <InputField
+        {/* <InputField
           label="Date"
           type="date"
           value={filters.date}
           onChange={(e) => handleFilterChange("date", e.target.value)}
-        />
+        /> */}
       </div>
 
       {/* Data Table */}

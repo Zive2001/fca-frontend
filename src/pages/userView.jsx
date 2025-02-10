@@ -8,6 +8,7 @@ import { toast } from "react-toastify";
 import { EyeIcon } from "@heroicons/react/24/outline";
 import { getFCAData, fetchPlants, fetchModules, getFailureReport } from "../services/api";
 import FailureReport from "../components/FailureReport";
+import LoadingOverlay from "../components/LoadingOverlay";
 
 const UserView = () => {
   const [filters, setFilters] = useState({
@@ -27,6 +28,7 @@ const UserView = () => {
   const [plants, setPlants] = useState([]);
   const [modules, setModules] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [isGeneratingReport, setIsGeneratingReport] = useState(false);
   const [failureReport, setFailureReport] = useState({
     isOpen: false,
     data: null
@@ -104,6 +106,7 @@ const UserView = () => {
   };
 
   const handleViewReport = async (auditId) => {
+    setIsGeneratingReport(true);
     try {
       const reportData = await getFailureReport(auditId);
       setFailureReport({
@@ -112,6 +115,8 @@ const UserView = () => {
       });
     } catch (error) {
       toast.error("Error fetching failure report: " + error.message);
+    } finally {
+      setIsGeneratingReport(false);
     }
   };
 
@@ -243,16 +248,28 @@ const UserView = () => {
                         <td className="px-4 py-3 text-sm text-gray-900">
                           {new Date(record.SubmissionDate).toLocaleString()}
                         </td>
-                        <td className="px-4 py-3 text-sm">
-                          <button
-                            onClick={() => handleViewReport(record.Id)}
-                            className="p-2 rounded-full hover:bg-blue-50 transition-colors duration-200 group"
-                            title="View Report"
-                          >
-                            <EyeIcon className="h-5 w-5 text-blue-600 group-hover:text-blue-700" />
-                            <span className="sr-only">View Report</span>
-                          </button>
-                        </td>
+                        
+<td className="px-4 py-3 text-sm">
+  {record.Status.toLowerCase() === 'fail' ? (
+    <button
+      onClick={() => handleViewReport(record.Id)}
+      className="p-2 rounded-full hover:bg-blue-50 transition-colors duration-200 group"
+      title="View Report"
+    >
+      <EyeIcon className="h-5 w-5 text-blue-600 group-hover:text-blue-700" />
+      <span className="sr-only">View Report</span>
+    </button>
+  ) : (
+    <button
+      disabled
+      className="p-2 rounded-full cursor-not-allowed"
+      title="Report not available for passed items"
+    >
+      <EyeIcon className="h-5 w-5 text-gray-300" />
+      <span className="sr-only">Report not available</span>
+    </button>
+  )}
+</td>
                       </tr>
                     ))}
                   </tbody>
@@ -298,6 +315,7 @@ const UserView = () => {
         isOpen={failureReport.isOpen}
         onClose={() => setFailureReport({ isOpen: false, data: null })}
       />
+      {isGeneratingReport && <LoadingOverlay />}
     </motion.div>
   );
 };

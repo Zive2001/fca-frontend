@@ -183,10 +183,15 @@ const FailureReport = ({ data, isOpen, onClose }) => {
                     <dd className="text-sm font-medium text-gray-900 text-right">{data.Module}</dd>
                     <dt className="text-sm text-gray-600">PO</dt>
                     <dd className="text-sm font-medium text-gray-900 text-right">{data.PO}</dd>
+                    <dt className="text-sm text-gray-600">VPO</dt>
+                    <dd className="text-sm font-medium text-red-900 text-right">{data.CPO_Number}</dd>
                     <dt className="text-sm text-gray-600">Size</dt>
                     <dd className="text-sm font-medium text-gray-900 text-right">{data.Size}</dd>
                     <dt className="text-sm text-gray-600">Style</dt>
                     <dd className="text-sm font-medium text-gray-900 text-right">{data.Style}</dd>
+                    <dt className="text-sm text-gray-600">Color</dt>
+                    <dd className="text-sm font-medium text-gray-900 text-right">{data.Customer_Color}</dd>
+                    
                   </dl>
                 </div>
                 <div className="bg-white rounded-xl shadow-sm p-6">
