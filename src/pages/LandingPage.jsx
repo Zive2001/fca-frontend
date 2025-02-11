@@ -1,36 +1,95 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import { useMsal, useIsAuthenticated } from "@azure/msal-react";
 
 const LandingPage = () => {
+  const { instance, accounts } = useMsal();
+  const isAuthenticated = useIsAuthenticated();
+  const [userData, setUserData] = useState(null);
+
+  useEffect(() => {
+    const checkUser = async () => {
+      if (isAuthenticated && accounts.length > 0) {
+        try {
+          // Get the active account
+          const activeAccount = instance.getActiveAccount() || accounts[0];
+          
+          if (activeAccount) {
+            setUserData({
+              name: activeAccount.name || activeAccount.username.split('@')[0],
+              email: activeAccount.username,
+              initials: activeAccount.name ? activeAccount.name.charAt(0) : activeAccount.username.charAt(0)
+            });
+          }
+        } catch (error) {
+          console.error("Error getting user data:", error);
+        }
+      }
+    };
+
+    checkUser();
+  }, [isAuthenticated, accounts, instance]);
+
+  const handleLogin = async () => {
+    try {
+      await instance.loginPopup({
+        scopes: ["User.Read", "profile", "email"],
+        prompt: "select_account"
+      });
+    } catch (error) {
+      console.error("Login failed:", error);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 text-white">
-      {/* Navbar */}
       <header className="flex items-center justify-between px-8 py-4 bg-gray-800 bg-opacity-80">
         <img 
           src="/fcalogo.svg" 
           alt="FCA App Logo" 
           className="h-full max-h-12" 
         />
-        <nav>
-          <ul className="flex space-x-6">
-            <li>
-              <Link to="/" className="hover:text-blue-500">
-                Home
-              </Link>
-            </li>
-            <li>
-              <Link to="/view-data" className="hover:text-blue-500">
-                View Data
-              </Link>
-            </li>
-            <li>
-              <Link to="/admin" className="hover:text-blue-500">
-                Admin
-              </Link>
-            </li>
-          </ul>
-        </nav>
+        <div className="flex items-center space-x-8">
+          <nav>
+            <ul className="flex space-x-6">
+              <li>
+                <Link to="/" className="hover:text-blue-500">Home</Link>
+              </li>
+              <li>
+                <Link to="/view-data" className="hover:text-blue-500">View Data</Link>
+              </li>
+              <li>
+                <Link to="/admin" className="hover:text-blue-500">Admin</Link>
+              </li>
+            </ul>
+          </nav>
+          
+          {isAuthenticated && userData ? (
+            <div className="flex items-center space-x-2 bg-gray-700 rounded-lg px-4 py-2">
+              <div className="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center">
+                <span className="text-white font-semibold">
+                  {userData.initials.toUpperCase()}
+                </span>
+              </div>
+              <div className="flex flex-col">
+                <span className="text-sm font-medium text-white">
+                  {userData.name}
+                </span>
+                <span className="text-xs text-gray-400">
+                  {userData.email}
+                </span>
+              </div>
+            </div>
+          ) : (
+            <button
+              onClick={handleLogin}
+              className="px-4 py-2 bg-blue-500 rounded-lg text-white hover:bg-blue-600"
+            >
+              Sign In
+            </button>
+          )}
+        </div>
       </header>
 
       {/* Hero Section */}

@@ -26,7 +26,7 @@ const msalConfig = {
   auth: {
     clientId: "7569e108-ac80-4fde-b698-968962b13303",
     authority: "https://login.microsoftonline.com/519f28ec-a14a-45a5-8697-409b75aeadca",
-    redirectUri: window.location.origin,
+    redirectUri: "https://sg-prod-bdyapp-fcafront.azurewebsites.net/",
   },
   cache: {
     cacheLocation: "sessionStorage",
@@ -35,6 +35,7 @@ const msalConfig = {
 };
 
 const msalInstance = new PublicClientApplication(msalConfig);
+window.msalInstance = msalInstance;
 
 // Optional - Check for cached accounts
 if (!msalInstance.getActiveAccount() && msalInstance.getAllAccounts().length > 0) {
