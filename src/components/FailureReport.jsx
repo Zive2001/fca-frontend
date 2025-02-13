@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { XMarkIcon, ClipboardIcon, ArrowDownTrayIcon, ExclamationCircleIcon } from "@heroicons/react/24/outline";
+import { XMarkIcon, ClipboardIcon, ArrowDownTrayIcon, ExclamationCircleIcon, CheckCircleIcon } from "@heroicons/react/24/outline";
 import html2canvas from 'html2canvas';
 import { toast } from 'react-toastify';
 
@@ -9,6 +9,8 @@ const FailureReport = ({ data, isOpen, onClose }) => {
 
   if (!isOpen || !data) return null;
 
+  const isPassed = data.Status?.toLowerCase() === 'pass';
+  
   const captureReport = async () => {
     if (!reportContentRef.current) return null;
     
@@ -42,20 +44,15 @@ const FailureReport = ({ data, isOpen, onClose }) => {
         });
       }));
 
-      // Calculate full dimensions
-      const contentWidth = reportContentRef.current.scrollWidth;
-      const contentHeight = reportContentRef.current.scrollHeight;
-
-      // Create canvas with full dimensions
       const canvas = await html2canvas(reportContentRef.current, {
         scale: 2,
         useCORS: true,
         logging: false,
         backgroundColor: '#ffffff',
-        width: contentWidth,
-        height: contentHeight,
-        windowWidth: contentWidth,
-        windowHeight: contentHeight,
+        width: reportContentRef.current.scrollWidth,
+        height: reportContentRef.current.scrollHeight,
+        windowWidth: reportContentRef.current.scrollWidth,
+        windowHeight: reportContentRef.current.scrollHeight,
         x: 0,
         y: 0,
         scrollX: 0,
@@ -98,7 +95,7 @@ const FailureReport = ({ data, isOpen, onClose }) => {
 
     try {
       const link = document.createElement('a');
-      link.download = `failure-report-${data.Id}.png`;
+      link.download = `qc-report-${data.Id}.png`;
       link.href = canvas.toDataURL('image/png');
       link.click();
       toast.success('Report downloaded successfully');
@@ -125,30 +122,46 @@ const FailureReport = ({ data, isOpen, onClose }) => {
     }
   };
 
+  const statusColors = isPassed ? {
+    bg: 'bg-green-50',
+    text: 'text-green-700',
+    icon: 'text-green-500',
+    border: 'border-green-200'
+  } : {
+    bg: 'bg-red-50',
+    text: 'text-red-700',
+    icon: 'text-red-500',
+    border: 'border-red-200'
+  };
+
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-sm" ref={containerRef}>
       <div className="flex min-h-screen items-center justify-center p-4">
         <div className="relative bg-gray-50 w-full max-w-4xl rounded-xl shadow-2xl">
           <div ref={reportContentRef} id="report-content" className="bg-white rounded-xl">
             <div className="p-8">
-              {/* Alert Banner */}
-              <div className="bg-red-50 rounded-xl shadow-sm mb-8">
+              {/* Status Banner */}
+              <div className={`${statusColors.bg} rounded-xl shadow-sm mb-8`}>
                 <div className="p-6 flex items-start gap-4">
                   <div className="flex-shrink-0">
-                    <ExclamationCircleIcon className="h-8 w-8 text-red-500" />
+                    {isPassed ? (
+                      <CheckCircleIcon className={`h-8 w-8 ${statusColors.icon}`} />
+                    ) : (
+                      <ExclamationCircleIcon className={`h-8 w-8 ${statusColors.icon}`} />
+                    )}
                   </div>
                   <div className="flex-grow">
                     <div className="flex justify-between items-start">
                       <div>
-                        <h2 className="text-xl font-semibold text-red-700">
-                          FCA {data.Type} Quality Control Failure
+                        <h2 className={`text-xl font-semibold ${statusColors.text}`}>
+                          FCA {data.Type} Quality Control {isPassed ? 'Pass' : 'Failure'}
                         </h2>
                         <div className="mt-2 flex flex-wrap gap-6 text-sm">
-                          <div className="flex items-center text-red-700">
+                          <div className={`flex items-center ${statusColors.text}`}>
                             <span className="font-medium">Defect Rate:</span>
                             <span className="ml-2 font-bold">{data.DefectRate}%</span>
                           </div>
-                          <div className="flex items-center text-red-700">
+                          <div className={`flex items-center ${statusColors.text}`}>
                             <span className="font-medium">Failed Items:</span>
                             <span className="ml-2 font-bold">{data.DefectQuantity}</span>
                           </div>
@@ -159,7 +172,7 @@ const FailureReport = ({ data, isOpen, onClose }) => {
                         </div>
                       </div>
                       <div className="text-right">
-                        <div className="text-sm font-bold text-red-700">
+                        <div className={`text-sm font-bold ${statusColors.text}`}>
                           Audit #{data.Id}
                         </div>
                         <div className="text-sm text-gray-600 mt-1">
@@ -170,7 +183,6 @@ const FailureReport = ({ data, isOpen, onClose }) => {
                   </div>
                 </div>
               </div>
-
 
               {/* Info Cards Grid */}
               <div className="grid grid-cols-2 gap-6 mb-8">
@@ -184,14 +196,13 @@ const FailureReport = ({ data, isOpen, onClose }) => {
                     <dt className="text-sm text-gray-600">PO</dt>
                     <dd className="text-sm font-medium text-gray-900 text-right">{data.PO}</dd>
                     <dt className="text-sm text-gray-600">VPO</dt>
-                    <dd className="text-sm font-medium text-red-900 text-right">{data.CPO_Number}</dd>
+                    <dd className="text-sm font-medium text-gray-900 text-right">{data.CPO_Number}</dd>
                     <dt className="text-sm text-gray-600">Size</dt>
                     <dd className="text-sm font-medium text-gray-900 text-right">{data.Size}</dd>
                     <dt className="text-sm text-gray-600">Style</dt>
                     <dd className="text-sm font-medium text-gray-900 text-right">{data.Style}</dd>
                     <dt className="text-sm text-gray-600">Color</dt>
                     <dd className="text-sm font-medium text-gray-900 text-right">{data.Customer_Color}</dd>
-                    
                   </dl>
                 </div>
                 <div className="bg-white rounded-xl shadow-sm p-6">
@@ -200,7 +211,9 @@ const FailureReport = ({ data, isOpen, onClose }) => {
                     <dt className="text-sm text-gray-600">Date</dt>
                     <dd className="text-sm font-medium text-gray-900 text-right">{data.FormattedSubmissionDate}</dd>
                     <dt className="text-sm text-gray-600">Defect Rate</dt>
-                    <dd className="text-sm font-medium text-red-600 text-right">{data.DefectRate}%</dd>
+                    <dd className={`text-sm font-medium ${isPassed ? 'text-green-600' : 'text-red-600'} text-right`}>
+                      {data.DefectRate}%
+                    </dd>
                     <dt className="text-sm text-gray-600">Inspected</dt>
                     <dd className="text-sm font-medium text-gray-900 text-right">{data.InspectedQuantity} pcs</dd>
                     <dt className="text-sm text-gray-600">Defects</dt>
@@ -209,52 +222,53 @@ const FailureReport = ({ data, isOpen, onClose }) => {
                 </div>
               </div>
 
-              {/* Defect Details */}
-              <div className="bg-white rounded-xl shadow-sm p-6">
-                <h4 className="text-sm font-semibold text-gray-900 mb-4">Defect Details</h4>
-                <div className="space-y-4">
-                  {data.defectEntries.map((entry, index) => (
-                    <div key={index} className="bg-gray-50 rounded-lg p-4 transition-all hover:shadow-md">
-                      <div className="flex justify-between items-start mb-3">
-                        <div>
-                          <h5 className="text-sm font-semibold text-gray-900">
-                            {entry.defectCategory} - {entry.defectCode}
-                          </h5>
-                          <div className="mt-2 space-y-1">
-                            <p className="text-sm text-gray-600">
-                              Location: {entry.locationCategory} - {entry.defectLocation}
-                            </p>
-                            <p className="text-sm text-gray-600">
-                              Quantity: {entry.quantity}
-                            </p>
+              {/* Defect Details - Only show if there are defects */}
+              {data.defectEntries && data.defectEntries.length > 0 && (
+                <div className="bg-white rounded-xl shadow-sm p-6">
+                  <h4 className="text-sm font-semibold text-gray-900 mb-4">Defect Details</h4>
+                  <div className="space-y-4">
+                    {data.defectEntries.map((entry, index) => (
+                      <div key={index} className="bg-gray-50 rounded-lg p-4 transition-all hover:shadow-md">
+                        <div className="flex justify-between items-start mb-3">
+                          <div>
+                            <h5 className="text-sm font-semibold text-gray-900">
+                              {entry.defectCategory} - {entry.defectCode}
+                            </h5>
+                            <div className="mt-2 space-y-1">
+                              <p className="text-sm text-gray-600">
+                                Location: {entry.locationCategory} - {entry.defectLocation}
+                              </p>
+                              <p className="text-sm text-gray-600">
+                                Quantity: {entry.quantity}
+                              </p>
+                            </div>
                           </div>
                         </div>
+                        
+                        {entry.photos && entry.photos.length > 0 && (
+                          <div className="grid grid-cols-4 gap-3 mt-4">
+                            {entry.photos.map((photo, photoIndex) => (
+                              <div key={photoIndex} className="relative group">
+                                <img
+                                  src={photo.dataUrl}
+                                  alt={`Defect ${index + 1} Photo ${photoIndex + 1}`}
+                                  className="h-24 w-full object-cover rounded-lg border-2 border-transparent 
+                                           group-hover:border-red-400 transition-all duration-200"
+                                />
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
-                      
-                      {entry.photos && entry.photos.length > 0 && (
-                        <div className="grid grid-cols-4 gap-3 mt-4">
-                          {entry.photos.map((photo, photoIndex) => (
-                            <div key={photoIndex} className="relative group">
-                              <img
-                                src={photo.dataUrl}
-                                alt={`Defect ${index + 1} Photo ${photoIndex + 1}`}
-                                className="h-24 w-full object-cover rounded-lg border-2 border-transparent 
-                                         group-hover:border-red-400 transition-all duration-200"
-                              />
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
 
-          
-       {/* Footer */}
-       <div className="flex justify-end gap-3 p-6 bg-gray-50 rounded-b-xl border-t border-gray-100">
+          {/* Footer */}
+          <div className="flex justify-end gap-3 p-6 bg-gray-50 rounded-b-xl border-t border-gray-100">
             <button
               onClick={handleCopy}
               className="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 
@@ -266,9 +280,9 @@ const FailureReport = ({ data, isOpen, onClose }) => {
             </button>
             <button
               onClick={handleDownload}
-              className="inline-flex items-center px-4 py-2 text-sm font-medium text-white 
-                       bg-red-600 rounded-lg hover:bg-red-700 shadow-sm 
-                       transition-all duration-200"
+              className={`inline-flex items-center px-4 py-2 text-sm font-medium text-white 
+                       ${isPassed ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'} 
+                       rounded-lg shadow-sm transition-all duration-200`}
             >
               <ArrowDownTrayIcon className="h-5 w-5 mr-2" />
               Download as PNG

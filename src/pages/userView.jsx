@@ -250,7 +250,7 @@ const UserView = () => {
                         </td>
                         
 <td className="px-4 py-3 text-sm">
-  {record.Status.toLowerCase() === 'fail' ? (
+ 
     <button
       onClick={() => handleViewReport(record.Id)}
       className="p-2 rounded-full hover:bg-blue-50 transition-colors duration-200 group"
@@ -259,16 +259,7 @@ const UserView = () => {
       <EyeIcon className="h-5 w-5 text-blue-600 group-hover:text-blue-700" />
       <span className="sr-only">View Report</span>
     </button>
-  ) : (
-    <button
-      disabled
-      className="p-2 rounded-full cursor-not-allowed"
-      title="Report not available for passed items"
-    >
-      <EyeIcon className="h-5 w-5 text-gray-300" />
-      <span className="sr-only">Report not available</span>
-    </button>
-  )}
+ 
 </td>
                       </tr>
                     ))}
