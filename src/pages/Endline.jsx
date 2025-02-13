@@ -7,7 +7,7 @@ import SubmissionSuccessDialog from "../components/SubmissionSuccessDialog";
 import Button from "../components/Button";
 import EmailNotificationHandler from '../components/EmailNotificationHandler';
 import { sendEmailNotification } from '../utils/emailNotificationUtil';
-
+import { useMsal } from "@azure/msal-react";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import CurrDate from '../components/CurrDate';
@@ -47,6 +47,8 @@ const itemVariants = {
 };
 
 const FCAEndline = () => {
+  const { accounts } = useMsal();
+  const userEmail = accounts[0]?.username || '';  // This will get the logged-in user's email
   const [plants, setPlants] = useState([]);
   const [newDefect, setNewDefect] = useState({
     defectCategory: "",
@@ -90,6 +92,7 @@ const [submittedAuditId, setSubmittedAuditId] = useState(null);
   defectRate: 0,
   locationCategory: "",
   type: "Endline",
+  createdBy: userEmail
 });
 
   const [errors, setErrors] = useState({});
@@ -538,6 +541,7 @@ useEffect(() => {
           defectRate: formData.defectRate,
           remarks: formData.remarks,
           type: formData.type,
+          createdBy: userEmail
         };
     
         // Submit main form data
@@ -625,7 +629,7 @@ useEffect(() => {
         variants={containerVariants}
       >
         <h1 className="text-2xl font-semibold mb-6 flex items-center">
-          <img src="/sewing.png" alt="Sewing Icon" className="w-6 h-6 mr-2" />
+          <img src="/endline.svg" alt="Sewing Icon" className="w-6 h-6 mr-2" />
           FCA Endline Form
         </h1>
         <p className="text-sm text-gray-600 font-semibold mb-6 translate-x-8 -translate-y-5">
