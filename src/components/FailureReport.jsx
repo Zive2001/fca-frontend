@@ -196,7 +196,7 @@ const FailureReport = ({ data, isOpen, onClose }) => {
                     <dt className="text-sm text-gray-600">PO</dt>
                     <dd className="text-sm font-medium text-gray-900 text-right">{data.PO}</dd>
                     <dt className="text-sm text-gray-600">VPO</dt>
-                    <dd className="text-sm font-medium text-gray-900 text-right">{data.CPO_Number}</dd>
+                    <dd className="text-sm font-medium text-cyan-900 text-right">{data.CPO_Number}</dd>
                     <dt className="text-sm text-gray-600">Size</dt>
                     <dd className="text-sm font-medium text-gray-900 text-right">{data.Size}</dd>
                     <dt className="text-sm text-gray-600">Style</dt>
@@ -208,8 +208,7 @@ const FailureReport = ({ data, isOpen, onClose }) => {
                 <div className="bg-white rounded-xl shadow-sm p-6">
                   <h4 className="text-sm font-semibold text-gray-900 mb-4">Inspection Summary</h4>
                   <dl className="grid grid-cols-2 gap-y-3">
-                    <dt className="text-sm text-gray-600">Date</dt>
-                    <dd className="text-sm font-medium text-gray-900 text-right">{data.FormattedSubmissionDate}</dd>
+                    
                     <dt className="text-sm text-gray-600">Defect Rate</dt>
                     <dd className={`text-sm font-medium ${isPassed ? 'text-green-600' : 'text-red-600'} text-right`}>
                       {data.DefectRate}%
