@@ -217,6 +217,8 @@ const FailureReport = ({ data, isOpen, onClose }) => {
                     <dd className="text-sm font-medium text-gray-900 text-right">{data.InspectedQuantity} pcs</dd>
                     <dt className="text-sm text-gray-600">Defects</dt>
                     <dd className="text-sm font-medium text-gray-900 text-right">{data.DefectQuantity} pcs</dd>
+                    <dt className="text-sm text-gray-600">Remarks</dt>
+                    <dd className="text-sm font-medium text-gray-900 text-right">{data.Remarks}</dd>
                   </dl>
                 </div>
               </div>
