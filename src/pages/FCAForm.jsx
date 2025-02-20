@@ -168,21 +168,19 @@ const [submittedAuditId, setSubmittedAuditId] = useState(null);
   }, [formData.plant]);
 
   useEffect(() => {
-    if (formData.plant) {
-      const loadPOs = async () => {
-        const poData = await fetchPOs(formData.plant);
-        setPos(
-          poData.map((item) => ({
-            id: item.id,
-            label: item.Sewing_Order,
-            value: item.Sewing_Order
-          }))
-        );
-      };
-      loadPOs();
-    }
-  }, [formData.plant]);
-  
+    const loadPOs = async () => {
+      const poData = await fetchPOs();
+      setPos(
+        poData.map((item) => ({
+          id: item.id,
+          label: item.Sewing_Order,
+          value: item.Sewing_Order
+        }))
+      );
+    };
+    loadPOs();
+  }, []); // Empty dependency array since we want to load all POs once
+
   useEffect(() => {
   if (formData.po) {
     const loadSizes = async () => {

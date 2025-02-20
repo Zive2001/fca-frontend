@@ -48,7 +48,7 @@ const itemVariants = {
 
 const FCAEndline = () => {
   const { accounts } = useMsal();
-  const userEmail = accounts[0]?.username || '';  // This will get the logged-in user's email
+  const userEmail = accounts[0]?.username || '';  // This will get the logged-in user's email // This will get the logged-in user's email
   const [plants, setPlants] = useState([]);
   const [newDefect, setNewDefect] = useState({
     defectCategory: "",
@@ -68,6 +68,8 @@ const FCAEndline = () => {
   const [isLocationCategoryLocked, setIsLocationCategoryLocked] = useState(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
 const [submittedAuditId, setSubmittedAuditId] = useState(null);
+
+
  
   const [formData, setFormData] = useState({
   plant: "",
@@ -166,22 +168,19 @@ const [submittedAuditId, setSubmittedAuditId] = useState(null);
   }, [formData.plant]);
 
   useEffect(() => {
-    if (formData.module) {
-      const loadPOs = async () => {
-        const poData = await fetchPOs(formData.module);
-        setPos(
-          poData.map((item) => ({
-            id: item.id,
-            label: item.Sewing_Order,
-            // Store the raw PO number as value
-            value: item.Sewing_Order
-          }))
-        );
-      };
-      loadPOs();
-    }
-  }, [formData.module]);
-
+    const loadPOs = async () => {
+      const poData = await fetchPOs();
+      setPos(
+        poData.map((item) => ({
+          id: item.id,
+          label: item.Sewing_Order,
+          value: item.Sewing_Order
+        }))
+      );
+    };
+    loadPOs();
+  }, []);
+  
   useEffect(() => {
   if (formData.po) {
     const loadSizes = async () => {

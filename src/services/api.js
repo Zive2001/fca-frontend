@@ -104,12 +104,12 @@ export const fetchModules = async (plant) => {
   }
 };
 
-export const fetchPOs = async (module) => {
+export const fetchPOs = async () => {
   try {
-    const response = await axios.get(`${API_URL}/pos/${module}`);
+    const response = await axios.get(`${API_URL}/pos`);
     return response.data;
   } catch (error) {
-    console.error(`Error fetching POs for module ${module}:`, error);
+    console.error(`Error fetching POs:`, error);
     return [];
   }
 };
