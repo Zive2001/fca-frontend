@@ -3,12 +3,38 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useMsal, useIsAuthenticated } from "@azure/msal-react";
 import { InteractionRequiredAuthError } from "@azure/msal-browser";
+import { BrowserAuthError } from "@azure/msal-browser";
 
 
 const LandingPage = () => {
   const { instance, accounts } = useMsal();
   const isAuthenticated = useIsAuthenticated();
   const [userData, setUserData] = useState(null);
+  const [authError, setAuthError] = useState(null);
+
+useEffect(() => {
+  const checkAuth = async () => {
+    try {
+      if (isAuthenticated && accounts.length > 0) {
+        const activeAccount = instance.getActiveAccount() || accounts[0];
+        if (activeAccount) {
+          setUserData({
+            name: activeAccount.name || activeAccount.username.split('@')[0],
+            email: activeAccount.username,
+            initials: activeAccount.name ? 
+              activeAccount.name.charAt(0) : 
+              activeAccount.username.charAt(0)
+          });
+        }
+      }
+    } catch (error) {
+      setAuthError(error);
+      console.error("Auth check failed:", error);
+    }
+  };
+
+  checkAuth();
+}, [isAuthenticated, accounts, instance]);
 
   useEffect(() => {
     // Check if we're wrapped in both providers
@@ -21,73 +47,100 @@ const LandingPage = () => {
   }, []);
 
   useEffect(() => {
-    const checkUser = async () => {
+    const initializeAuth = async () => {
       if (isAuthenticated && accounts.length > 0) {
-        try {
-          // Get the active account
-          const activeAccount = instance.getActiveAccount() || accounts[0];
+        // Get active account, or first account if no active account set
+        const activeAccount = instance.getActiveAccount() || accounts[0];
+        
+        if (activeAccount) {
+          // Ensure we set this account as active
+          instance.setActiveAccount(activeAccount);
           
-          if (activeAccount) {
-            setUserData({
-              name: activeAccount.name || activeAccount.username.split('@')[0],
-              email: activeAccount.username,
-              initials: activeAccount.name ? activeAccount.name.charAt(0) : activeAccount.username.charAt(0)
-            });
-          }
-        } catch (error) {
-          console.error("Error getting user data:", error);
+          setUserData({
+            name: activeAccount.name || activeAccount.username.split('@')[0],
+            email: activeAccount.username,
+            initials: activeAccount.name ? 
+              activeAccount.name.charAt(0) : 
+              activeAccount.username.charAt(0)
+          });
         }
       }
     };
-
-    checkUser();
+  
+    initializeAuth();
   }, [isAuthenticated, accounts, instance]);
+  useEffect(() => {
+    const initAuth = async () => {
+      console.log("Initializing auth...");
+      
+      // Get all accounts
+      const accounts = instance.getAllAccounts();
+      console.log("Available accounts:", accounts);
+  
+      // Check if we have any accounts
+      if (accounts.length > 0) {
+        // Get active account or use first available
+        const activeAccount = instance.getActiveAccount() || accounts[0];
+        
+        if (activeAccount) {
+          try {
+            // Try to silently acquire token to verify account is still valid
+            const silentRequest = {
+              scopes: ["User.Read", "profile", "email", "openid"],
+              account: activeAccount
+            };
+            
+            const response = await instance.ssoSilent(silentRequest);
+            
+            if (response) {
+              setUserData({
+                name: activeAccount.name || activeAccount.username.split('@')[0],
+                email: activeAccount.username,
+                initials: activeAccount.name ? 
+                  activeAccount.name.charAt(0) : 
+                  activeAccount.username.charAt(0)
+              });
+              
+              console.log("Successfully initialized auth with account:", activeAccount);
+            }
+          } catch (error) {
+            console.error("Error during silent token acquisition:", error);
+            // Token might be expired, clear the account
+            instance.setActiveAccount(null);
+          }
+        }
+      }
+    };
+  
+    initAuth();
+  }, [instance]);
 
   const handleLogin = async () => {
     try {
-      // First check if we already have an account
-      const currentAccounts = instance.getAllAccounts();
-      if (currentAccounts.length > 0) {
-        // Account exists, set it as active
-        instance.setActiveAccount(currentAccounts[0]);
-        setUserData({
-          name: currentAccounts[0].name || currentAccounts[0].username.split('@')[0],
-          email: currentAccounts[0].username,
-          initials: currentAccounts[0].name ? 
-            currentAccounts[0].name.charAt(0) : 
-            currentAccounts[0].username.charAt(0)
-        });
-        return;
-      }
-  
-      // No account exists, proceed with login
       const loginRequest = {
-        scopes: ["User.Read", "profile", "email"],
+        scopes: ["User.Read", "profile", "email", "openid"],  // Added openid scope
         prompt: "select_account"
       };
   
-      // Try silent token acquisition first
-      try {
-        const silentResult = await instance.ssoSilent(loginRequest);
-        if (silentResult) {
-          instance.setActiveAccount(silentResult.account);
-          setUserData({
-            name: silentResult.account.name || silentResult.account.username.split('@')[0],
-            email: silentResult.account.username,
-            initials: silentResult.account.name ? 
-              silentResult.account.name.charAt(0) : 
-              silentResult.account.username.charAt(0)
-          });
-          return;
-        }
-      } catch (silentError) {
-        console.log("Silent token acquisition failed, proceeding with popup", silentError);
-      }
+      // Log state before login
+      console.log("Pre-login state:", {
+        currentAccounts: instance.getAllAccounts(),
+        activeAccount: instance.getActiveAccount()
+      });
   
-      // If silent login fails, try popup
       const result = await instance.loginPopup(loginRequest);
+      
       if (result) {
+        // Immediately set active account
         instance.setActiveAccount(result.account);
+        
+        // Force cache update
+        await instance.ssoSilent({
+          account: result.account,
+          scopes: ["User.Read", "profile", "email", "openid"]
+        });
+  
+        // Set user data
         setUserData({
           name: result.account.name || result.account.username.split('@')[0],
           email: result.account.username,
@@ -95,18 +148,19 @@ const LandingPage = () => {
             result.account.name.charAt(0) : 
             result.account.username.charAt(0)
         });
+  
+        // Log state after login
+        console.log("Post-login state:", {
+          account: result.account,
+          cachedAccounts: instance.getAllAccounts(),
+          activeAccount: instance.getActiveAccount()
+        });
       }
     } catch (error) {
-      if (error instanceof BrowserAuthError && error.errorCode === 'user_cancelled') {
-        console.log("User cancelled the login process");
-        // Handle user cancellation gracefully
-        return;
-      }
-      console.error("Login failed:", error);
-      // You might want to show a user-friendly error message here
+      console.error("Login error:", error);
     }
   };
-
+  
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 text-white">
       <header className="flex items-center justify-between px-8 py-4 bg-gray-800 bg-opacity-80">
