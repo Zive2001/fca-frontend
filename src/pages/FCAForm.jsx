@@ -7,7 +7,7 @@ import SubmissionSuccessDialog from "../components/SubmissionSuccessDialog";
 import Button from "../components/Button";
 import EmailNotificationHandler from '../components/EmailNotificationHandler';
 import { sendEmailNotification } from '../utils/emailNotificationUtil';
-import { useMsal } from "@azure/msal-react";
+// import { useMsal } from "@azure/msal-react";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import CurrDate from '../components/CurrDate';
@@ -47,8 +47,8 @@ const itemVariants = {
 };
 
 const FCAForm = () => {
-  const { accounts } = useMsal();
-  const userEmail = accounts[0]?.username || '';  // This will get the logged-in user's email // This will get the logged-in user's email
+ 
+  const [userEmail, setUserEmail] = useState("");  // This will get the logged-in user's email // This will get the logged-in user's email
   const [plants, setPlants] = useState([]);
   const [newDefect, setNewDefect] = useState({
     defectCategory: "",
@@ -69,6 +69,16 @@ const FCAForm = () => {
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
 const [submittedAuditId, setSubmittedAuditId] = useState(null);
 
+useEffect(() => {
+  fetch("/.auth/me")
+    .then(res => res.json())
+    .then(data => {
+      if (data.length > 0) {
+        setUserEmail(data[0].user_id);
+      }
+    })
+    .catch(err => console.error("Failed to fetch user:", err));
+}, []);
 
  
   const [formData, setFormData] = useState({
@@ -94,14 +104,20 @@ const [submittedAuditId, setSubmittedAuditId] = useState(null);
   defectRate: 0,
   locationCategory: "",
   type: "Inline",
-  createdBy: userEmail
+  createdBy: ""
 });
 
   const [errors, setErrors] = useState({});
 
 
-  
-
+  useEffect(() => {
+    if (userEmail) {
+      setFormData(prev => ({
+        ...prev,
+        createdBy: userEmail
+      }));
+    }
+  }, [userEmail]);
   // Modified useEffect for plant data
   useEffect(() => {
     const loadData = async () => {
@@ -627,14 +643,15 @@ useEffect(() => {
         animate="visible"
         variants={containerVariants}
       >
-        <h1 className="text-2xl font-semibold mb-6 flex items-center">
-          <img src="/inlineicon2.svg" alt="Sewing Icon" className="w-6 h-6 mr-2" />
-          FCA Inline Form
-        </h1>
-        <p className="text-sm text-gray-600 font-semibold mb-6 translate-x-8 -translate-y-5">
+        <h1 className="text-2xl font-semibold mb-4 flex items-center">
+    <img src="/inlineicon2.svg" alt="Sewing Icon" className="w-6 h-6 mr-2" />
+    FCA Inline Form
+  </h1>
+  <p className="text-sm text-gray-600 font-semibold mb-6 translate-x-8 -translate-y-5">
           <CurrDate />
         </p>
-        
+     
+
         <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Left side fields - Reorganized */}
           <div className="space-y-6">

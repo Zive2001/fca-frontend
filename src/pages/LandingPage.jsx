@@ -1,59 +1,45 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { useMsal } from "@azure/msal-react";
 import { motion } from "framer-motion";
 
 const LandingPage = () => {
-  const { instance } = useMsal();
   const [userEmail, setUserEmail] = useState(null);
 
   useEffect(() => {
-    // Get the active account
-    const account = instance.getActiveAccount();
-    
-    if (account) {
-      setUserEmail(account.username);
-    } else {
-      // If no active account, try to login
-      instance.loginPopup({
-        scopes: ["User.Read"]
-      }).then(response => {
-        if (response?.account) {
-          instance.setActiveAccount(response.account);
-          setUserEmail(response.account.username);
+    fetch("/.auth/me")
+      .then(res => res.json())
+      .then(data => {
+        if (data.length > 0) {
+          setUserEmail(data[0].user_id);
         }
-      }).catch(error => {
-        console.error("Login failed:", error);
-      });
-    }
-  }, [instance]);
+      })
+      .catch(err => console.error("Failed to fetch user:", err));
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 text-white">
       <header className="flex items-center justify-between px-8 py-4 bg-gray-800 bg-opacity-80">
-        <img src="/fcalogo.svg" alt="FCA App Logo" className="h-full max-h-12" />
+        {userEmail && (
+          <div className="flex items-center space-x-2 bg-gray-700 rounded-lg px-4 py-2">
+            <div className="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center">
+              <span className="text-white font-semibold">
+                {userEmail.charAt(0).toUpperCase()}
+              </span>
+            </div>
+            <span className="text-sm text-white">{userEmail}</span>
+          </div>
+        )}
         <div className="flex items-center space-x-8">
           <nav>
             <ul className="flex space-x-6">
               <li><Link to="/" className="hover:text-blue-500">Home</Link></li>
               <li><Link to="/view-data" className="hover:text-blue-500">View Data</Link></li>
+              <li><Link to="/Analytics" className="hover:text-blue-500">Dashboard</Link></li>
               <li><Link to="/admin" className="hover:text-blue-500">Admin</Link></li>
             </ul>
           </nav>
-          
-          {userEmail && (
-            <div className="flex items-center space-x-2 bg-gray-700 rounded-lg px-4 py-2">
-              <div className="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center">
-                <span className="text-white font-semibold">
-                  {userEmail.charAt(0).toUpperCase()}
-                </span>
-              </div>
-              <span className="text-sm text-white">{userEmail}</span>
-            </div>
-          )}
         </div>
       </header>
-
 
       {/* Hero Section */}
       <section className="text-center py-20">
@@ -128,34 +114,34 @@ const LandingPage = () => {
         </motion.div>
 
         {/* Final Audit */}
-<motion.div
-  whileHover={{ scale: 1.02 }}
-  className="relative bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl overflow-hidden shadow-xl border border-gray-700/30 opacity-75"
->
-  <div className="absolute inset-0 bg-grid-white/[0.05] pointer-events-none" />
-  <div className="block p-6">
-    <div className="relative h-40 flex items-center justify-center mb-4">
-      <div className="absolute inset-0 bg-blue-500/10 blur-2xl rounded-full" />
-      <img
-        src="./mgr.svg"
-        alt="Final Audit"
-        className="h-32 relative grayscale opacity-50"
-      />
-      <div className="absolute top-2 right-2">
-        <span className="px-3 py-1 text-xs font-medium text-blue-200/80 bg-blue-500/10 rounded-full border border-blue-200/10">
-          Coming Soon 🚀
-        </span>
-      </div>
-    </div>
-    <h2 className="text-xl font-semibold mb-2 text-gray-400">
-      Final Audit
-    </h2>
-    <p className="text-sm text-gray-500">
-     Final Audit module is under development. Stay tuned! ✨
-    </p>
-  </div>
-  <div className="absolute inset-0 pointer-events-none cursor-not-allowed" />
-</motion.div>
+        <motion.div
+          whileHover={{ scale: 1.02 }}
+          className="relative bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl overflow-hidden shadow-xl border border-gray-700/30 opacity-75"
+        >
+          <div className="absolute inset-0 bg-grid-white/[0.05] pointer-events-none" />
+          <div className="block p-6">
+            <div className="relative h-40 flex items-center justify-center mb-4">
+              <div className="absolute inset-0 bg-blue-500/10 blur-2xl rounded-full" />
+              <img
+                src="./mgr.svg"
+                alt="Final Audit"
+                className="h-32 relative grayscale opacity-50"
+              />
+              <div className="absolute top-2 right-2">
+                <span className="px-3 py-1 text-xs font-medium text-blue-200/80 bg-blue-500/10 rounded-full border border-blue-200/10">
+                  Coming Soon 🚀
+                </span>
+              </div>
+            </div>
+            <h2 className="text-xl font-semibold mb-2 text-gray-400">
+              Final Audit
+            </h2>
+            <p className="text-sm text-gray-500">
+              Final Audit module is under development. Stay tuned! ✨
+            </p>
+          </div>
+          <div className="absolute inset-0 pointer-events-none cursor-not-allowed" />
+        </motion.div>
       </motion.section>
 
       {/* Footer */}
