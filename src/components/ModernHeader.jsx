@@ -60,7 +60,7 @@ const ModernHeader = () => {
   ];
 
   // Check if we're on landing or admin landing pages
-  const hideOnPaths = ['/', '/admin','/add-Data','/view-audits'];
+  const hideOnPaths = ['/', '/admin','/add-Data','/view-audits','/Analytics'];
   if (hideOnPaths.includes(location.pathname)) {
     return null;
   }

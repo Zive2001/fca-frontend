@@ -17,66 +17,36 @@ import AdminLanding from "./pages/AdminLanding";
 import AddData from "./pages/AddData";
 import Home from "./pages/Home";
 import GetStartedGuide from "./pages/GetStartedGuide";
+import Analytics from "./pages/Analytics";
 
 // Component imports
 import ModernHeader from "./components/ModernHeader";
 
-// MSAL configuration
 const msalConfig = {
   auth: {
     clientId: "7569e108-ac80-4fde-b698-968962b13303",
     authority: "https://login.microsoftonline.com/519f28ec-a14a-45a5-8697-409b75aeadca",
-    redirectUri: window.location.origin,
-    postLogoutRedirectUri: window.location.origin,
-    navigateToLoginRequestUrl: true
+    redirectUri: "https://sg-prod-bdyapp-fcafront.azurewebsites.net"
   },
   cache: {
-    cacheLocation: "localStorage",
-    storeAuthStateInCookie: true,
-    secureCookies: false // Set to true only in production
-  },
-  system: {
-    loggerOptions: {
-      loggerCallback: (level, message, containsPii) => {
-        if (containsPii) {
-          return;
-        }
-        console.log(message);
-      },
-      piiLoggingEnabled: false,
-      logLevel: "Info"
-    }
+    cacheLocation: "localStorage"
   }
 };
 
 const msalInstance = new PublicClientApplication(msalConfig);
-window.msalInstance = msalInstance;
 
-// Optional - Check for cached accounts
-if (!msalInstance.getActiveAccount() && msalInstance.getAllAccounts().length > 0) {
-  msalInstance.setActiveAccount(msalInstance.getAllAccounts()[0]);
-}
-// Add this right after creating msalInstance
+// Simple initialization
 const accounts = msalInstance.getAllAccounts();
 if (accounts.length > 0) {
   msalInstance.setActiveAccount(accounts[0]);
 }
+
 const App = () => {
   return (
     <MsalProvider instance={msalInstance}>
       <AuthProvider>
         <Router>
-          <ToastContainer 
-            position="top-right" 
-            autoClose={3000}
-            hideProgressBar={false}
-            newestOnTop={false}
-            closeOnClick
-            rtl={false}
-            pauseOnFocusLoss
-            draggable
-            pauseOnHover
-          />
+          <ToastContainer />
           <ModernHeader />
           <Routes>
             <Route path="/" element={<LandingPage />} />
@@ -88,6 +58,7 @@ const App = () => {
             <Route path="/add-Data" element={<AddData />} />
             <Route path="/home" element={<Home />} />
             <Route path="/get-started" element={<GetStartedGuide />} />
+            <Route path="/analytics" element={<Analytics />} />
           </Routes>
         </Router>
       </AuthProvider>

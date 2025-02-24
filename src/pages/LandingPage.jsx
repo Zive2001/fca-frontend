@@ -1,215 +1,59 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { useMsal } from "@azure/msal-react";
 import { motion } from "framer-motion";
-import { useMsal, useIsAuthenticated } from "@azure/msal-react";
-import { InteractionRequiredAuthError } from "@azure/msal-browser";
-import { BrowserAuthError } from "@azure/msal-browser";
-
 
 const LandingPage = () => {
-  const { instance, accounts } = useMsal();
-  const isAuthenticated = useIsAuthenticated();
-  const [userData, setUserData] = useState(null);
-  const [authError, setAuthError] = useState(null);
-
-useEffect(() => {
-  const checkAuth = async () => {
-    try {
-      if (isAuthenticated && accounts.length > 0) {
-        const activeAccount = instance.getActiveAccount() || accounts[0];
-        if (activeAccount) {
-          setUserData({
-            name: activeAccount.name || activeAccount.username.split('@')[0],
-            email: activeAccount.username,
-            initials: activeAccount.name ? 
-              activeAccount.name.charAt(0) : 
-              activeAccount.username.charAt(0)
-          });
-        }
-      }
-    } catch (error) {
-      setAuthError(error);
-      console.error("Auth check failed:", error);
-    }
-  };
-
-  checkAuth();
-}, [isAuthenticated, accounts, instance]);
+  const { instance } = useMsal();
+  const [userEmail, setUserEmail] = useState(null);
 
   useEffect(() => {
-    // Check if we're wrapped in both providers
-    console.log("MSAL Provider present:", !!instance);
-    console.log("Auth Context present:", !!userData);
+    // Get the active account
+    const account = instance.getActiveAccount();
     
-    // Check session storage for cached auth
-    const cachedAccounts = instance.getAllAccounts();
-    console.log("Cached accounts:", cachedAccounts);
-  }, []);
-
-  useEffect(() => {
-    const initializeAuth = async () => {
-      if (isAuthenticated && accounts.length > 0) {
-        // Get active account, or first account if no active account set
-        const activeAccount = instance.getActiveAccount() || accounts[0];
-        
-        if (activeAccount) {
-          // Ensure we set this account as active
-          instance.setActiveAccount(activeAccount);
-          
-          setUserData({
-            name: activeAccount.name || activeAccount.username.split('@')[0],
-            email: activeAccount.username,
-            initials: activeAccount.name ? 
-              activeAccount.name.charAt(0) : 
-              activeAccount.username.charAt(0)
-          });
+    if (account) {
+      setUserEmail(account.username);
+    } else {
+      // If no active account, try to login
+      instance.loginPopup({
+        scopes: ["User.Read"]
+      }).then(response => {
+        if (response?.account) {
+          instance.setActiveAccount(response.account);
+          setUserEmail(response.account.username);
         }
-      }
-    };
-  
-    initializeAuth();
-  }, [isAuthenticated, accounts, instance]);
-  useEffect(() => {
-    const initAuth = async () => {
-      console.log("Initializing auth...");
-      
-      // Get all accounts
-      const accounts = instance.getAllAccounts();
-      console.log("Available accounts:", accounts);
-  
-      // Check if we have any accounts
-      if (accounts.length > 0) {
-        // Get active account or use first available
-        const activeAccount = instance.getActiveAccount() || accounts[0];
-        
-        if (activeAccount) {
-          try {
-            // Try to silently acquire token to verify account is still valid
-            const silentRequest = {
-              scopes: ["User.Read", "profile", "email", "openid"],
-              account: activeAccount
-            };
-            
-            const response = await instance.ssoSilent(silentRequest);
-            
-            if (response) {
-              setUserData({
-                name: activeAccount.name || activeAccount.username.split('@')[0],
-                email: activeAccount.username,
-                initials: activeAccount.name ? 
-                  activeAccount.name.charAt(0) : 
-                  activeAccount.username.charAt(0)
-              });
-              
-              console.log("Successfully initialized auth with account:", activeAccount);
-            }
-          } catch (error) {
-            console.error("Error during silent token acquisition:", error);
-            // Token might be expired, clear the account
-            instance.setActiveAccount(null);
-          }
-        }
-      }
-    };
-  
-    initAuth();
+      }).catch(error => {
+        console.error("Login failed:", error);
+      });
+    }
   }, [instance]);
 
-  const handleLogin = async () => {
-    try {
-      const loginRequest = {
-        scopes: ["User.Read", "profile", "email", "openid"],  // Added openid scope
-        prompt: "select_account"
-      };
-  
-      // Log state before login
-      console.log("Pre-login state:", {
-        currentAccounts: instance.getAllAccounts(),
-        activeAccount: instance.getActiveAccount()
-      });
-  
-      const result = await instance.loginPopup(loginRequest);
-      
-      if (result) {
-        // Immediately set active account
-        instance.setActiveAccount(result.account);
-        
-        // Force cache update
-        await instance.ssoSilent({
-          account: result.account,
-          scopes: ["User.Read", "profile", "email", "openid"]
-        });
-  
-        // Set user data
-        setUserData({
-          name: result.account.name || result.account.username.split('@')[0],
-          email: result.account.username,
-          initials: result.account.name ? 
-            result.account.name.charAt(0) : 
-            result.account.username.charAt(0)
-        });
-  
-        // Log state after login
-        console.log("Post-login state:", {
-          account: result.account,
-          cachedAccounts: instance.getAllAccounts(),
-          activeAccount: instance.getActiveAccount()
-        });
-      }
-    } catch (error) {
-      console.error("Login error:", error);
-    }
-  };
-  
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 text-white">
       <header className="flex items-center justify-between px-8 py-4 bg-gray-800 bg-opacity-80">
-        <img 
-          src="/fcalogo.svg" 
-          alt="FCA App Logo" 
-          className="h-full max-h-12" 
-        />
+        <img src="/fcalogo.svg" alt="FCA App Logo" className="h-full max-h-12" />
         <div className="flex items-center space-x-8">
           <nav>
             <ul className="flex space-x-6">
-              <li>
-                <Link to="/" className="hover:text-blue-500">Home</Link>
-              </li>
-              <li>
-                <Link to="/view-data" className="hover:text-blue-500">View Data</Link>
-              </li>
-              <li>
-                <Link to="/admin" className="hover:text-blue-500">Admin</Link>
-              </li>
+              <li><Link to="/" className="hover:text-blue-500">Home</Link></li>
+              <li><Link to="/view-data" className="hover:text-blue-500">View Data</Link></li>
+              <li><Link to="/admin" className="hover:text-blue-500">Admin</Link></li>
             </ul>
           </nav>
           
-          {isAuthenticated && userData ? (
+          {userEmail && (
             <div className="flex items-center space-x-2 bg-gray-700 rounded-lg px-4 py-2">
               <div className="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center">
                 <span className="text-white font-semibold">
-                  {userData.initials.toUpperCase()}
+                  {userEmail.charAt(0).toUpperCase()}
                 </span>
               </div>
-              <div className="flex flex-col">
-                <span className="text-sm font-medium text-white">
-                  {userData.name}
-                </span>
-                <span className="text-xs text-gray-400">
-                  {userData.email}
-                </span>
-              </div>
+              <span className="text-sm text-white">{userEmail}</span>
             </div>
-          ) : (
-            <button
-              onClick={handleLogin}
-              className="px-4 py-2 bg-blue-500 rounded-lg text-white hover:bg-blue-600"
-            >
-              Sign In
-            </button>
           )}
         </div>
       </header>
+
 
       {/* Hero Section */}
       <section className="text-center py-20">
