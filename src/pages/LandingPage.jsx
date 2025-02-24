@@ -18,10 +18,10 @@ const LandingPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 text-white">
-      <header className="flex items-center justify-between px-8 py-4 bg-gray-800 bg-opacity-80">
+      <header className="flex items-center justify-between px-8 py-4 bg-transparent bg-opacity-80">
         {userEmail && (
-          <div className="flex items-center space-x-2 bg-gray-700 rounded-lg px-4 py-2">
-            <div className="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center">
+          <div className="flex items-center space-x-2 bg-transparent rounded-lg px-4 py-2">
+            <div className="h-8 w-8 rounded-full bg-gray-900 flex items-center justify-center">
               <span className="text-white font-semibold">
                 {userEmail.charAt(0).toUpperCase()}
               </span>

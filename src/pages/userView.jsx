@@ -128,8 +128,8 @@ const UserView = () => {
 
   const getTypeBadgeClass = (type) => {
     return type.toLowerCase() === 'inline'
-      ? 'bg-blue-100 text-blue-800 border-blue-200'
-      : 'bg-purple-100 text-purple-800 border-purple-200';
+      ? 'bg-[#8ecae6] text-[#023047] border-[#8ecae6]'  
+      : 'bg-[#8d99ae] text-[#2b2d42] border-[#8d99ae]';
   };
 
   return (
