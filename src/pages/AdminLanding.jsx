@@ -101,16 +101,19 @@ const AdminLanding = () => {
             </Link>
           </motion.div>
 
-          {/* Add Emails Button (Disabled) */}
+          {/* Add Emails Button - Now Active */}
           <motion.div
             whileHover={{ scale: 1.05 }}
-            className="bg-gray-800 rounded-xl p-6 shadow-lg opacity-50 cursor-not-allowed"
+            className="bg-gray-800 rounded-xl p-6 shadow-lg"
             initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 0.5, y: 0 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.3 }}
           >
-            <div className="text-center">
-              <div className="bg-gray-500 rounded-lg p-4 mb-4">
+            <Link
+              to="/admin/email-management"
+              className="block text-center"
+            >
+              <div className="bg-purple-500 rounded-lg p-4 mb-4">
                 <svg
                   className="w-12 h-12 mx-auto text-white"
                   fill="none"
@@ -126,9 +129,9 @@ const AdminLanding = () => {
                   />
                 </svg>
               </div>
-              <h2 className="text-xl font-semibold mb-2">Add Emails</h2>
-              <p className="text-gray-400">Coming Soon</p>
-            </div>
+              <h2 className="text-xl font-semibold mb-2">Manage Admins</h2>
+              <p className="text-gray-400">Add or remove admin users</p>
+            </Link>
           </motion.div>
         </div>
       </section>

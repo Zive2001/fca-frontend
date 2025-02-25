@@ -473,3 +473,88 @@ export const fetchDefectLocationAnalytics = async (dateRange, plant) => {
         throw new Error('Failed to fetch defect location data');
     }
 };
+
+//admin user apis
+
+
+// Add an interceptor to handle Azure AD tokens
+axiosInstance.interceptors.request.use(async (config) => {
+  try {
+    const response = await fetch('/.auth/me');
+    const authData = await response.json();
+    if (authData.length > 0) {
+      config.headers['X-MS-CLIENT-PRINCIPAL-NAME'] = authData[0].user_id;
+    }
+  } catch (error) {
+    console.error('Error fetching auth data:', error);
+  }
+  return config;
+});
+
+// Check if user is an admin
+export const checkAdminStatus = async (email) => {
+  try {
+    const response = await axiosInstance.get(`/admin/check/${encodeURIComponent(email)}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error checking admin status:', error);
+    if (error.response) {
+      console.error('Server responded with:', error.response.status);
+      console.error('Response data:', error.response.data);
+    }
+    return { 
+      isAdmin: false, 
+      error: error.response?.data?.error || error.message 
+    };
+  }
+};
+
+// Add a new admin user
+export const addAdminUser = async (email, createdBy) => {
+  try {
+    const response = await axiosInstance.post(`/admin/add`, {
+      email,
+      createdBy
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error adding admin user:', error);
+    throw error;
+  }
+};
+
+// Get all admin users
+export const getAdminUsers = async () => {
+  try {
+    const response = await axiosInstance.get(`/admin/users`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching admin users:', error);
+    throw error; // Throw error to handle it in the component
+  }
+};
+
+// Remove an admin user
+export const removeAdminUser = async (email) => {
+  try {
+    const response = await axiosInstance.delete(`/admin/remove/${encodeURIComponent(email)}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error removing admin user:', error);
+    throw error;
+  }
+};
+
+// Debug authentication
+export const debugAuth = async () => {
+  try {
+    const response = await axiosInstance.get(`/admin/auth-debug`);
+    return response.data;
+  } catch (error) {
+    console.error('Error in auth debug:', error);
+    return {
+      error: error.message,
+      authenticated: false
+    };
+  }
+};
