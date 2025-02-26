@@ -87,13 +87,13 @@ const AdminEmailManagement = () => {
         const mockAdminEmails = [
           { 
             Email: "admin@masholdings.com", 
-            CreatedBy: "system", 
+            CreatedBy: "System", 
             CreatedAt: new Date().toISOString(),
             IsActive: true 
           },
           { 
             Email: "supunse@masholdings.com", 
-            CreatedBy: "system", 
+            CreatedBy: "System", 
             CreatedAt: new Date().toISOString(),
             IsActive: true 
           }
@@ -193,6 +193,11 @@ const AdminEmailManagement = () => {
         setAdminEmails(updatedAdmins);
       }
     }
+  };
+
+  // Check if an admin is system-created (cannot be removed)
+  const isSystemCreated = (admin) => {
+    return admin.CreatedBy === 'System' || admin.CreatedBy === 'system';
   };
 
   return (
@@ -346,7 +351,9 @@ const AdminEmailManagement = () => {
                         )}
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap">
-                        {admin.IsActive && admin.Email !== currentUserEmail && (
+                        {admin.IsActive && 
+                         admin.Email !== currentUserEmail && 
+                         !isSystemCreated(admin) && (
                           <button
                             onClick={() => handleRemoveAdmin(admin.Email)}
                             className="text-red-400 hover:text-red-300 disabled:opacity-50"
@@ -354,6 +361,13 @@ const AdminEmailManagement = () => {
                           >
                             Remove
                           </button>
+                        )}
+                        {admin.IsActive && 
+                         admin.Email !== currentUserEmail && 
+                         isSystemCreated(admin) && (
+                          <span className="text-gray-500 text-xs italic">
+                            System Protected
+                          </span>
                         )}
                       </td>
                     </tr>
@@ -388,9 +402,9 @@ const AdminEmailManagement = () => {
                       .map((admin, index) => (
                       <tr key={index} className="bg-gray-700 bg-opacity-20">
                         <td className="px-4 py-3 whitespace-nowrap text-gray-400">{admin.Email}</td>
-                        <td className="px-4 py-3 whitespace-nowrap text-gray-400">{admin.CreatedBy}</td>
+                        <td className="px-4 py-3 whitespace-nowrap text-gray-400">{currentUserEmail || "Current User"}</td>
                         <td className="px-4 py-3 whitespace-nowrap text-gray-400">
-                          {new Date(admin.CreatedAt).toLocaleDateString()}
+                          {new Date().toLocaleDateString()}
                         </td>
                       </tr>
                     ))}
