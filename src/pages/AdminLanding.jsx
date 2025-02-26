@@ -47,7 +47,7 @@ const AdminLanding = () => {
               to="/add-Data"
               className="block text-center"
             >
-              <div className="bg-blue-500 rounded-lg p-4 mb-4">
+              <div className="bg-[#0096c7] rounded-lg p-4 mb-4">
                 <svg
                   className="w-12 h-12 mx-auto text-white"
                   fill="none"
@@ -80,7 +80,7 @@ const AdminLanding = () => {
               to="/view-audits"
               className="block text-center"
             >
-              <div className="bg-green-500 rounded-lg p-4 mb-4">
+              <div className="bg-[#ee9b00] rounded-lg p-4 mb-4">
                 <svg
                   className="w-12 h-12 mx-auto text-white"
                   fill="none"
@@ -113,7 +113,7 @@ const AdminLanding = () => {
               to="/admin/email-management"
               className="block text-center"
             >
-              <div className="bg-purple-500 rounded-lg p-4 mb-4">
+              <div className="bg-[#005f73] rounded-lg p-4 mb-4">
                 <svg
                   className="w-12 h-12 mx-auto text-white"
                   fill="none"

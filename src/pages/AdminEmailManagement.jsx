@@ -375,10 +375,10 @@ const AdminEmailManagement = () => {
                         Email
                       </th>
                       <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">
-                        Created By
+                        Deactivated By
                       </th>
                       <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">
-                        Created At
+                        Deactivated At
                       </th>
                     </tr>
                   </thead>

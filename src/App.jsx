@@ -41,9 +41,9 @@ const App = () => {
         <Route 
           path="/admin/email-management" 
           element={
-           
+            <ProtectedRoute>
               <AdminEmailManagement />
-           
+           </ProtectedRoute>
           } 
         />
         <Route path="/view-data" element={<UserView />} />
@@ -57,10 +57,10 @@ const App = () => {
         />
         <Route 
           path="/add-Data" 
-          element={
-            <ProtectedRoute>
-              <AddData />
-            </ProtectedRoute>
+          element={<AddData />
+            // <ProtectedRoute>
+            //   <AddData />
+            // </ProtectedRoute>
           } 
         />
         <Route path="/home" element={<Home />} />

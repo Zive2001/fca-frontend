@@ -5,6 +5,7 @@ import { API_URL } from "../services/api";
 import { FaUpload, FaSpinner } from "react-icons/fa";
 import { AiOutlineFileExcel } from "react-icons/ai";
 import { BsInfoCircle } from "react-icons/bs";
+import { Link } from 'react-router-dom';
 
 const AddData = () => {
   const [file, setFile] = useState(null);
@@ -43,8 +44,28 @@ const AddData = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-r from-gray-900 via-gray-800 to-gray-700 flex items-center justify-center p-6 relative">
-      <div className="bg-gray-800 shadow-2xl rounded-xl p-8 w-full max-w-lg transform transition-all hover:scale-105 hover:shadow-xl">
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 text-white">
+      {/* Navbar - Exactly matching AdminEmailManagement */}
+      <header className="flex items-center justify-between px-8 py-4 bg-gray-800 bg-opacity-80">
+        <img src="/fcalogo.svg" alt="FCA App Logo" className="h-full max-h-12" />
+        <nav>
+          <ul className="flex space-x-6">
+            <li>
+              <Link to="/admin" className="hover:text-blue-500">
+                Back to Admin Dashboard
+              </Link>
+            </li>
+            <li>
+              <Link to="/" className="hover:text-blue-500">
+                Home
+              </Link>
+            </li>
+          </ul>
+        </nav>
+      </header>
+      
+      <div className="flex-1 flex items-center justify-center p-6 mt-24">
+        <div className="bg-gray-800 shadow-2xl rounded-xl p-8 w-full max-w-lg transform transition-all hover:scale-105 hover:shadow-xl">
         <h1 className="text-3xl font-bold text-center text-white mb-8">Upload Excel File</h1>
 
         <div className="mb-6">
@@ -139,6 +160,7 @@ const AddData = () => {
       >
         <BsInfoCircle size={32} />
       </button>
+    </div>
     </div>
   );
 };
