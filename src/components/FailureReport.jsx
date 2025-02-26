@@ -193,6 +193,8 @@ const FailureReport = ({ data, isOpen, onClose }) => {
                     <dd className="text-sm font-medium text-gray-900 text-right">{data.Plant}</dd>
                     <dt className="text-sm text-gray-600">Module</dt>
                     <dd className="text-sm font-medium text-gray-900 text-right">{data.Module}</dd>
+                    <dt className="text-sm text-gray-600">Shift</dt>
+                    <dd className="text-sm font-medium text-gray-900 text-right">{data.Shift}</dd>
                     <dt className="text-sm text-gray-600">PO</dt>
                     <dd className="text-sm font-medium text-gray-900 text-right">{data.PO}</dd>
                     <dt className="text-sm text-gray-600">VPO</dt>

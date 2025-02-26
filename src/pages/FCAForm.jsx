@@ -14,6 +14,7 @@ import CurrDate from '../components/CurrDate';
 import { PlusCircleIcon, TrashIcon } from "@heroicons/react/24/solid";
 import Select from "react-select";
 import DefectEntry from '../components/DefectEntry';
+import { Switch } from "@headlessui/react";
 
 import {
   fetchPlants,
@@ -104,11 +105,18 @@ useEffect(() => {
   defectRate: 0,
   locationCategory: "",
   type: "Inline",
-  createdBy: ""
+  createdBy: "",
+  isThirdParty: false
 });
 
   const [errors, setErrors] = useState({});
 
+  const handleThirdPartyToggle = (checked) => {
+    setFormData((prev) => ({
+      ...prev,
+      isThirdParty: checked
+    }));
+  };
 
   useEffect(() => {
     if (userEmail) {
@@ -556,7 +564,8 @@ useEffect(() => {
           defectRate: formData.defectRate,
           remarks: formData.remarks,
           type: formData.type,
-          createdBy: userEmail
+          createdBy: userEmail,
+          isThirdParty: formData.isThirdParty
         };
     
         // Submit main form data
@@ -647,10 +656,29 @@ useEffect(() => {
     <img src="/inlineicon2.svg" alt="Sewing Icon" className="w-6 h-6 mr-2" />
     FCA Inline Form
   </h1>
-  <p className="text-sm text-gray-600 font-semibold mb-6 translate-x-8 -translate-y-5">
+  <p className="text-sm text-gray-600 font-semibold mb-3 translate-x-8 -translate-y-5">
           <CurrDate />
         </p>
-     
+        <div className="flex items-center mb-6 translate-x-8 -translate-y-5">
+          <span className="text-sm text-gray-700 font-medium mr-3">
+            {formData.isThirdParty ? "Third Party Audit" : "Internal Audit"}
+          </span>
+          <Switch
+            checked={formData.isThirdParty}
+            onChange={handleThirdPartyToggle}
+            className={`${
+              formData.isThirdParty ? "bg-gray-900" : "bg-gray-300"
+            } relative inline-flex h-6 w-11 items-center rounded-full  transition-colors focus:outline-none  focus:ring-slate-800  focus:ring-offset-0`}
+          >
+            <span className="sr-only">Enable third party audit</span>
+            <span
+              className={`${
+                formData.isThirdParty ? "translate-x-6" : "translate-x-1"
+              } inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
+            />
+          </Switch>
+        </div>
+      
 
         <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Left side fields - Reorganized */}
