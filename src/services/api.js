@@ -209,32 +209,61 @@
     }
   };
 
-  export const getFCAData = async (filters) => {
-    const { plant, module, shift, po, size, status, type, date, page, limit } = filters;
-    try {
-      // Format date to YYYY-MM-DD if it exists
-      const formattedDate = date ? new Date(date).toISOString().split('T')[0] : null;
-      
-      const queryParams = new URLSearchParams({
-        ...(plant && { plant }),
-        ...(module && { module }),
-        ...(shift && { shift }),
-        ...(po && { po }),
-        ...(size && { size }),
-        ...(status && { status }),
-        ...(type && { type }),
-        ...(formattedDate && { date: formattedDate }),
-        page: page || 1,
-        limit: limit || 10
-      });
-
-      const response = await axios.get(`${API_URL}/data?${queryParams}`);
-      return response.data;
-    } catch (error) {
-      console.error("Error fetching FCA data:", error);
-      throw error;
+  // Updated getFCAData function with debugging
+export const getFCAData = async (filters) => {
+  const { 
+    plant, 
+    module, 
+    shift, 
+    po, 
+    size, 
+    status, 
+    type, 
+    date, 
+    page, 
+    limit,
+    id,           // New filter parameter
+    customer,     // New filter parameter
+    isThirdParty  // New filter parameter
+  } = filters;
+  
+  try {
+    // Format date to YYYY-MM-DD if it exists
+    const formattedDate = date ? new Date(date).toISOString().split('T')[0] : null;
+    
+    // Create an object with all non-empty parameters
+    const queryParamsObj = {
+      ...(plant && { plant }),
+      ...(module && { module }),
+      ...(shift && { shift }),
+      ...(po && { po }),
+      ...(size && { size }),
+      ...(status && { status }),
+      ...(type && { type }),
+      ...(formattedDate && { date: formattedDate }),
+      ...(id && { id }),                       // Add ID filter parameter if exists
+      ...(customer && { customer }),           // Add customer filter parameter if exists
+      page: page || 1,
+      limit: limit || 10
+    };
+    
+    // Handle isThirdParty specially since it can be boolean or string
+    if (isThirdParty !== undefined && isThirdParty !== "") {
+      queryParamsObj.isThirdParty = isThirdParty;
     }
-  };
+
+    // For debugging - log the actual parameters being sent
+    console.log("Query parameters being sent to server:", queryParamsObj);
+    
+    const queryParams = new URLSearchParams(queryParamsObj);
+    
+    const response = await axios.get(`${API_URL}/data?${queryParams}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching FCA data:", error);
+    throw error;
+  }
+};
 
   export const updateFCAData = async (id, updatedData) => {
     try {
