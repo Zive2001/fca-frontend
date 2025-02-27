@@ -2,8 +2,8 @@
 
   // Base API URL
 
-  export const API_URL = "https://sg-prod-bdyapp-fcatest.azurewebsites.net/api/fca";
-  //export const API_URL = "http://localhost:8080/api/fca";
+ // export const API_URL = "https://sg-prod-bdyapp-fcatest.azurewebsites.net/api/fca";
+  export const API_URL = "http://localhost:8080/api/fca";
   // Create axios instance with default config
   const axiosInstance = axios.create({
     baseURL: API_URL,
@@ -422,87 +422,94 @@ export const getFCAData = async (filters) => {
 
   // Dashboard Analytics API Functions
 
-  export const fetchDashboardAnalytics = async (dateRange, plant) => {
-    try {
-        const params = new URLSearchParams({
-            dateRange: dateRange.toString(),
-            plant: plant || 'all'
-        });
-        
-        // Updated endpoint to match server.js route
-        const response = await axios.get(`${API_URL}/analytics/dashboard?${params}`);
-        
-        if (!response.data) {
-            throw new Error('No data received from the server');
-        }
-        
-        return response.data;
-    } catch (error) {
-        console.error('Error fetching dashboard analytics:', error);
-        throw new Error(error.response?.data?.error || 'Failed to fetch dashboard data');
+ // Dashboard Analytics API Functions - Updated with date range parameters
+
+export const fetchDashboardAnalytics = async (startDate, endDate, plant) => {
+  try {
+    const params = new URLSearchParams({
+      startDate: startDate,
+      endDate: endDate,
+      plant: plant || 'all'
+    });
+    
+    // Updated endpoint to match server.js route
+    const response = await axios.get(`${API_URL}/analytics/dashboard?${params}`);
+    
+    if (!response.data) {
+      throw new Error('No data received from the server');
     }
+    
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching dashboard analytics:', error);
+    throw new Error(error.response?.data?.error || 'Failed to fetch dashboard data');
+  }
 };
 
-export const fetchShiftAnalytics = async (dateRange, plant) => {
-    try {
-        const params = new URLSearchParams({
-            dateRange: dateRange.toString(),
-            plant: plant || 'all'
-        });
-        // Updated endpoint to match server.js route
-        const response = await axios.get(`${API_URL}/analytics/shift-analysis?${params}`);
-        return response.data;
-    } catch (error) {
-        console.error('Error fetching shift analytics:', error);
-        throw new Error('Failed to fetch shift performance data');
-    }
+export const fetchModuleAnalytics = async (startDate, endDate, plant) => {
+  try {
+    const params = new URLSearchParams({
+      startDate: startDate,
+      endDate: endDate,
+      plant: plant || 'all'
+    });
+    // Updated endpoint to match server.js route
+    const response = await axios.get(`${API_URL}/analytics/module-analysis?${params}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching module analytics:', error);
+    throw new Error('Failed to fetch module performance data');
+  }
 };
 
-export const fetchModuleAnalytics = async (dateRange, plant) => {
-    try {
-        const params = new URLSearchParams({
-            dateRange: dateRange.toString(),
-            plant: plant || 'all'
-        });
-        // Updated endpoint to match server.js route
-        const response = await axios.get(`${API_URL}/analytics/module-analysis?${params}`);
-        return response.data;
-    } catch (error) {
-        console.error('Error fetching module analytics:', error);
-        throw new Error('Failed to fetch module performance data');
-    }
+export const fetchCustomerAnalytics = async (startDate, endDate, plant) => {
+  try {
+    const params = new URLSearchParams({
+      startDate: startDate,
+      endDate: endDate,
+      plant: plant || 'all'
+    });
+    // Updated endpoint to match server.js route
+    const response = await axios.get(`${API_URL}/analytics/customer-analysis?${params}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching customer analytics:', error);
+    throw new Error('Failed to fetch customer performance data');
+  }
 };
 
-export const fetchCustomerAnalytics = async (dateRange, plant) => {
-    try {
-        const params = new URLSearchParams({
-            dateRange: dateRange.toString(),
-            plant: plant || 'all'
-        });
-        // Updated endpoint to match server.js route
-        const response = await axios.get(`${API_URL}/analytics/customer-analysis?${params}`);
-        return response.data;
-    } catch (error) {
-        console.error('Error fetching customer analytics:', error);
-        throw new Error('Failed to fetch customer performance data');
-    }
+export const fetchDefectLocationAnalytics = async (startDate, endDate, plant) => {
+  try {
+    const params = new URLSearchParams({
+      startDate: startDate,
+      endDate: endDate,
+      plant: plant || 'all'
+    });
+    // Updated endpoint to match server.js route
+    const response = await axios.get(`${API_URL}/analytics/defect-location-analysis?${params}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching defect location analytics:', error);
+    throw new Error('Failed to fetch defect location data');
+  }
 };
 
-export const fetchDefectLocationAnalytics = async (dateRange, plant) => {
-    try {
-        const params = new URLSearchParams({
-            dateRange: dateRange.toString(),
-            plant: plant || 'all'
-        });
-        // Updated endpoint to match server.js route
-        const response = await axios.get(`${API_URL}/analytics/defect-location-analysis?${params}`);
-        return response.data;
-    } catch (error) {
-        console.error('Error fetching defect location analytics:', error);
-        throw new Error('Failed to fetch defect location data');
-    }
+// New endpoint for defect code analysis
+export const fetchDefectCodeAnalytics = async (startDate, endDate, plant) => {
+  try {
+    const params = new URLSearchParams({
+      startDate: startDate,
+      endDate: endDate,
+      plant: plant || 'all'
+    });
+    // New endpoint for defect code analysis
+    const response = await axios.get(`${API_URL}/analytics/defect-code-analysis?${params}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching defect code analytics:', error);
+    throw new Error('Failed to fetch defect code data');
+  }
 };
-
 //admin user apis
 
 
