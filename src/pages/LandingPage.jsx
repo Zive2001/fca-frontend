@@ -186,11 +186,18 @@ const LandingPage = () => {
       </motion.section>
 
       {/* Footer */}
-      <footer className="mt-16 py-6 bg-gray-800 text-center">
-        <p className="text-gray-400 text-sm font-semibold">
-          © 2024 FCA App. Bodyline Digital Excellence.
-        </p>
-      </footer>
+         <footer className="mt-16 py-4 bg-gray-800 text-center flex items-center justify-between     px-8">
+  <div className="flex items-center">
+    <img 
+      src="/MAS White.png" 
+      alt="FCA App Logo" 
+      className="h-10 w-auto"
+    />
+  </div>
+  <p className="text-white text-sm font-semibold items-center">
+    © {new Date().getFullYear()} FCA App. Bodyline Digital Excellence.
+  </p>
+</footer>
     </div>
   );
 };

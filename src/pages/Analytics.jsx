@@ -133,14 +133,58 @@ const Analytics = () => {
   // Get the overall metrics
   const { totalAudits, passedAudits, failedAudits, overallPassRate, overallDefectRate } = analyticsData.overallMetrics || {};
 
+  // Transform customer data for clustered bar chart - group by customer name
+  const customerMap = new Map();
+  
+  (analyticsData?.customerAnalysis || []).forEach(customer => {
+    const customerName = customer?.Customer || 'N/A';
+    
+    if (customerMap.has(customerName)) {
+      // If we already have this customer, add to existing counts
+      const existingCustomer = customerMap.get(customerName);
+      existingCustomer.Passed += customer?.passedAudits || 0;
+      existingCustomer.Failed += customer?.failedAudits || 0;
+      existingCustomer.TotalAudits += customer?.totalAudits || 0;
+      existingCustomer.TotalDefectRate += (customer?.avgDefectRate || 0) * (customer?.totalAudits || 0);
+    } else {
+      // First time seeing this customer
+      customerMap.set(customerName, {
+        Customer: customerName,
+        Passed: customer?.passedAudits || 0,
+        Failed: customer?.failedAudits || 0,
+        TotalAudits: customer?.totalAudits || 0,
+        TotalDefectRate: (customer?.avgDefectRate || 0) * (customer?.totalAudits || 0)
+      });
+    }
+  });
+  
+  // Calculate the averages and format the data for the chart
+  const transformedCustomerData = Array.from(customerMap.values()).map(customer => ({
+    Customer: customer.Customer,
+    Passed: customer.Passed,
+    Failed: customer.Failed,
+    PassRate: customer.TotalAudits > 0 ? (customer.Passed / customer.TotalAudits) * 100 : 0,
+    AvgDefectRate: customer.TotalAudits > 0 ? customer.TotalDefectRate / customer.TotalAudits : 0
+  }));
+
   return (
     <div className="min-h-screen bg-white text-gray-800">
       {/* Header Section */}
       <div className="w-full bg-gray-50 border-b border-gray-200 py-6">
-        <div className="max-w-7xl mx-auto px-4">
-          <h1 className="text-3xl font-bold text-center mb-6 text-gray-800">FCA Analytics Dashboard</h1>
-          
-          <div className="flex flex-wrap justify-center gap-4 mb-4">
+  <div className="max-w-7xl mx-auto px-4">
+    <div className="flex items-center justify-between mb-6">
+      {/* Logo added here */}
+      <img 
+        src="/bodyline2.png" 
+        alt="MAS Holdings Logo" 
+        className="h-10 w-auto"
+      />
+      <h1 className="text-3xl font-bold text-center text-gray-800">FCA Analytics Dashboard</h1>
+      <div className="w-10"></div> {/* Empty div for balanced centering */}
+    </div>
+    
+    <div className="flex flex-wrap justify-center gap-4 mb-4">
+      {/* Date picker and plant selector remain unchanged */}
             <div className="flex items-center space-x-2">
               <FaCalendarAlt className="text-gray-500" />
               <DatePicker
@@ -198,20 +242,20 @@ const Analytics = () => {
 
           <div className="bg-white rounded-lg p-4 border border-gray-200 shadow-sm">
             <div className="flex items-center">
-              <FaCheckCircle className="h-8 w-8 text-green-600" />
+              <FaCheckCircle className="h-8 w-8 text-[#0a9396]" />
               <div className="ml-3">
                 <p className="text-sm text-gray-600">Passed Audits</p>
-                <h3 className="text-xl font-bold text-green-600">{passedAudits}</h3>
+                <h3 className="text-xl font-bold text-[#0a9396]">{passedAudits}</h3>
               </div>
             </div>
           </div>
 
           <div className="bg-white rounded-lg p-4 border border-gray-200 shadow-sm">
             <div className="flex items-center">
-              <FaTimesCircle className="h-8 w-8 text-red-600" />
+              <FaTimesCircle className="h-8 w-8 text-[#ae2012]" />
               <div className="ml-3">
                 <p className="text-sm text-gray-600">Failed Audits</p>
-                <h3 className="text-xl font-bold text-red-600">{failedAudits}</h3>
+                <h3 className="text-xl font-bold text-[#ae2012]">{failedAudits}</h3>
               </div>
             </div>
           </div>
@@ -280,11 +324,7 @@ const Analytics = () => {
                 <YAxis stroke="#374151" />
                 <Tooltip contentStyle={{ backgroundColor: '#FFFFFF', border: '1px solid #E5E7EB' }} />
                 <Legend />
-                <Bar dataKey="count" fill="#023047" name="Count">
-                  {(analyticsData?.defectCategories || []).map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={`#${Math.floor(((index * 50) % 150) + 100).toString(16)}47${Math.floor(((index * 70) % 150) + 100).toString(16)}`} />
-                  ))}
-                </Bar>
+                <Bar dataKey="count" fill="#003049" name="Count" />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -300,13 +340,13 @@ const Analytics = () => {
                 <YAxis yAxisId="right" orientation="right" stroke="#64748B" />
                 <Tooltip contentStyle={{ backgroundColor: '#FFFFFF', border: '1px solid #E5E7EB' }} />
                 <Legend />
-                <Bar yAxisId="left" dataKey="passRate" fill="#219ebc" name="Pass Rate (%)" />
-                <Bar yAxisId="right" dataKey="avgDefectRate" fill="#64748B" name="Defect Rate (%)" />
+                <Bar yAxisId="left" dataKey="passRate" fill="#8ecae6" name="Pass Rate (%)" />
+                <Bar yAxisId="right" dataKey="avgDefectRate" fill="#023047" name="Defect Rate (%)" />
               </BarChart>
             </ResponsiveContainer>
           </div>
 
-          {/* Defect Code Analysis - NEW CHART */}
+          {/* Defect Code Analysis - FIXED OVERLAP */}
           <div className="bg-white rounded-lg p-6 border border-gray-200 shadow-sm">
             <h3 className="text-lg font-bold mb-4 text-gray-800">
               <FaCode className="inline-block mr-2" />
@@ -316,7 +356,7 @@ const Analytics = () => {
               <BarChart 
                 data={analyticsData?.defectCodeAnalysis?.slice(0, 10) || []} 
                 layout="vertical"
-                margin={{ top: 5, right: 30, left: 100, bottom: 5 }}
+                margin={{ top: 5, right: 30, left: 120, bottom: 5 }}
               >
                 <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" horizontal={false} />
                 <XAxis type="number" stroke="#374151" />
@@ -324,60 +364,69 @@ const Analytics = () => {
                   type="category" 
                   dataKey="DefectCode" 
                   stroke="#374151"
-                  width={90}
-                  tick={{ fontSize: 12 }}
+                  width={110}
+                  tick={{ fontSize: 11 }}
                 />
                 <Tooltip contentStyle={{ backgroundColor: '#FFFFFF', border: '1px solid #E5E7EB' }} />
                 <Legend />
-                <Bar dataKey="defectCount" fill="#8884d8" name="Defect Count">
-                  {(analyticsData?.defectCodeAnalysis?.slice(0, 10) || []).map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={`#${Math.floor(((index * 70) % 150) + 100).toString(16)}47${Math.floor(((index * 50) % 150) + 100).toString(16)}`} />
-                  ))}
-                </Bar>
+                <Bar dataKey="defectCount" fill="#023047" name="Defect Count" />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        {/* Customer Analysis Table - UPDATED */}
+        {/* Customer Performance Analysis - CHANGED TO BAR CHART */}
         <div className="bg-white rounded-lg p-6 border border-gray-200 shadow-sm mt-6">
           <h3 className="text-lg font-bold mb-4 text-gray-800">Customer Performance Analysis</h3>
-          <div className="overflow-x-auto">
+          <ResponsiveContainer width="100%" height={400}>
+            <BarChart 
+              data={transformedCustomerData} 
+              margin={{ top: 5, right: 30, left: 20, bottom: 25 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+              <XAxis 
+                dataKey="Customer" 
+                stroke="#374151" 
+                angle={-45} 
+                textAnchor="end" 
+                height={60}
+                tick={{ fontSize: 12 }}
+              />
+              <YAxis stroke="#374151" />
+              <Tooltip contentStyle={{ backgroundColor: '#FFFFFF', border: '1px solid #E5E7EB' }} />
+              <Legend wrapperStyle={{ paddingTop: 15 }} />
+              <Bar dataKey="Passed" fill="#8ecae6" name="Passed Audits" />
+              <Bar dataKey="Failed" fill="#219ebc" name="Failed Audits" />
+            </BarChart>
+          </ResponsiveContainer>
+          
+          {/* Small Stats Table for Pass Rate and Defect Rate */}
+          <div className="mt-4 overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead>
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Audits</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Passed</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Failed</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pass Rate</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Avg Defect Rate</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                {(analyticsData?.customerAnalysis || []).map((customer, idx) => (
+                {transformedCustomerData.map((customer, idx) => (
                   <tr key={idx} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap text-gray-800 font-medium">{customer?.Customer || 'N/A'}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-gray-800">{customer?.totalAudits || 0}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-green-600 font-medium">{customer?.passedAudits || 0}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-red-600 font-medium">{customer?.failedAudits || 0}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-gray-800">
-                      <div className="flex items-center">
-                        <span 
-                          className={`font-medium ${parseFloat(customer?.passRate || 0) > 90 ? 'text-green-600' : parseFloat(customer?.passRate || 0) > 80 ? 'text-yellow-600' : 'text-red-600'}`}
-                        >
-                          {(customer?.passRate || 0).toFixed(2)}%
-                        </span>
-                      </div>
+                    <td className="px-6 py-4 whitespace-nowrap text-gray-800 font-medium">{customer.Customer}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span 
+                        className={`font-medium ${customer.PassRate > 90 ? 'text-green-600' : customer.PassRate > 80 ? 'text-yellow-600' : 'text-red-600'}`}
+                      >
+                        {customer.PassRate.toFixed(2)}%
+                      </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-gray-800">
-                      <div className="flex items-center">
-                        <span 
-                          className={`font-medium ${parseFloat(customer?.avgDefectRate || 0) < 3 ? 'text-green-600' : parseFloat(customer?.avgDefectRate || 0) < 7 ? 'text-yellow-600' : 'text-red-600'}`}
-                        >
-                          {(customer?.avgDefectRate || 0).toFixed(2)}%
-                        </span>
-                      </div>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span 
+                        className={`font-medium ${customer.AvgDefectRate < 3 ? 'text-green-600' : customer.AvgDefectRate < 7 ? 'text-yellow-600' : 'text-red-600'}`}
+                      >
+                        {customer.AvgDefectRate.toFixed(2)}%
+                      </span>
                     </td>
                   </tr>
                 ))}
@@ -396,7 +445,7 @@ const Analytics = () => {
             <BarChart 
               data={analyticsData?.defectLocationAnalysis?.slice(0, 10) || []}
               layout="vertical"
-              margin={{ top: 5, right: 30, left: 100, bottom: 5 }}
+              margin={{ top: 5, right: 30, left: 120, bottom: 5 }}
             >
               <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" horizontal={false} />
               <XAxis type="number" stroke="#374151" />
@@ -404,20 +453,28 @@ const Analytics = () => {
                 type="category" 
                 dataKey="DefectLocation" 
                 stroke="#374151"
-                width={90}
-                tick={{ fontSize: 12 }}
+                width={110}
+                tick={{ fontSize: 11 }}
               />
               <Tooltip contentStyle={{ backgroundColor: '#FFFFFF', border: '1px solid #E5E7EB' }} />
               <Legend />
-              <Bar dataKey="totalDefects" fill="#219ebc" name="Total Defects">
-                {(analyticsData?.defectLocationAnalysis?.slice(0, 10) || []).map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={`#${Math.floor(((index * 60) % 150) + 100).toString(16)}${Math.floor(((index * 70) % 150) + 100).toString(16)}${Math.floor(((index * 80) % 150) + 100).toString(16)}`} />
-                ))}
-              </Bar>
+              <Bar dataKey="totalDefects" fill="#219ebc" name="Total Defects" />
             </BarChart>
           </ResponsiveContainer>
         </div>
       </div>
+      <footer className="mt-16 py-4 bg-gray-800 text-center flex items-center justify-between px-8">
+  <div className="flex items-center">
+    <img 
+      src="/MAS White.png" 
+      alt="FCA App Logo" 
+      className="h-10 w-auto"
+    />
+  </div>
+  <p className="text-white text-sm font-semibold">
+    © {new Date().getFullYear()} FCA App. Bodyline Digital Excellence.
+  </p>
+</footer>
     </div>
   );
 };
