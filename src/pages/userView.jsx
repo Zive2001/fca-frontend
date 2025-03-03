@@ -362,7 +362,9 @@ const UserView = () => {
                         {/* Plant/Module combined column */}
                         <td className="px-3 py-2 text-sm text-gray-500">
                           <div className="font-medium text-gray-900">{record.Plant}</div>
-                          <div className="text-xs text-gray-500">{record.Module}</div>
+                          <div className="text-xs text-gray-500">{record.Module}   Shift:{record.Shift}</div>
+                          
+
                         </td>
                         
                         {/* PO/Style combined column */}

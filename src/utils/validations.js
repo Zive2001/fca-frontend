@@ -6,10 +6,15 @@ export const calculateDefectRate = (defectQuantity, inspectedQuantity) => {
 };
 
 // Determine status based on inspected quantity and defect quantity
-export const determineStatus = (defectRate) => {
-    // Pass if defect quantity is 0 or 1 (which means rate will be <= 5 for 20pcs and <= 3.125 for 32pcs)
-    // This effectively implements the 0-1 defect pass rule for both 20 and 32 pieces
-    return defectRate <= 5 ? "Pass" : "Fail";
+export const determineStatus = (defectRate, inspectedQuantity) => {
+    if (inspectedQuantity === 20) {
+        // For 20-piece inspection, 0 defects is pass, 1 or more is fail
+        return defectRate === 0 ? "Pass" : "Fail";
+    } else if (inspectedQuantity === 32) {
+        // For 32-piece inspection, 0-1 defects is pass, 2 or more is fail
+        return defectRate < 2 ? "Pass" : "Fail";
+    }
+    return "Invalid Quantity"; // Optional fallback for unsupported quantities
 };
 
 // Validate defect quantity against inspected quantity

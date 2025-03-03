@@ -486,14 +486,16 @@ useEffect(() => {
         const updatedData = { ...prevData, [field]: value };
   
         if (field === "defectQuantity" || field === "inspectedQuantity") {
-          const defectRate = calculateDefectRate(
-            updatedData.defectQuantity,
-            updatedData.inspectedQuantity
-          );
-          updatedData.defectRate = defectRate;
-          updatedData.status = determineStatus(defectRate);
-        }
-  
+  const defectRate = calculateDefectRate(
+    updatedData.defectQuantity,
+    updatedData.inspectedQuantity
+  );
+  updatedData.defectRate = defectRate;
+  updatedData.status = determineStatus(
+    Number(updatedData.defectQuantity), 
+    updatedData.inspectedQuantity
+  );
+}
         return updatedData;
       });
     };
@@ -850,20 +852,20 @@ useEffect(() => {
 
               {/* Second Row: Status and Rate */}
               <div className="pt-2">
-                <div className="flex items-center space-x-6">
-                  {/* Status */}
-                  <div className="flex items-center space-x-2">
-                    <label className="text-sm font-medium text-gray-700">Status:</label>
-                    <div
-                      className={`inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium w-20 justify-normal  ${
-                        formData.defectRate <= 5 
-                          ? "bg-green-100 text-green-800 border border-green-200" 
-                          : "bg-red-100 text-red-800 border border-red-200"
-                      }`}
-                    >
-                      {formData.defectRate <= 5 ? "Pass" : "Fail"}
-                    </div>
-                  </div>
+  <div className="flex items-center space-x-6">
+    {/* Status */}
+    <div className="flex items-center space-x-2">
+      <label className="text-sm font-medium text-gray-700">Status:</label>
+      <div
+        className={`inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium w-20 justify-normal ${
+          formData.status === "Pass"
+            ? "bg-green-100 text-green-800 border border-green-200" 
+            : "bg-red-100 text-red-800 border border-red-200"
+        }`}
+      >
+        {formData.status || "Pending"}
+      </div>
+    </div>
 
                   {/* Defect Rate */}
                   <div className="flex items-center space-x-2">
