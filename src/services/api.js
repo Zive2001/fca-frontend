@@ -3,7 +3,7 @@
   // Base API URL
 
   export const API_URL = "https://sg-prod-bdyapp-fcatest.azurewebsites.net/api/fca";
- // export const API_URL = "http://localhost:8080/api/fca";
+  //export const API_URL = "http://localhost:8080/api/fca";
   // Create axios instance with default config
   const axiosInstance = axios.create({
     baseURL: API_URL,
@@ -216,8 +216,10 @@ export const getFCAData = async (filters) => {
     module, 
     shift, 
     po, 
+    cpoNumber,
     size, 
     status, 
+    style, 
     type, 
     date, 
     page, 
@@ -237,8 +239,10 @@ export const getFCAData = async (filters) => {
       ...(module && { module }),
       ...(shift && { shift }),
       ...(po && { po }),
+      ...(cpoNumber && { cpoNumber }),
       ...(size && { size }),
       ...(status && { status }),
+      ...(style && { style }),
       ...(type && { type }),
       ...(formattedDate && { date: formattedDate }),
       ...(id && { id }),                       // Add ID filter parameter if exists

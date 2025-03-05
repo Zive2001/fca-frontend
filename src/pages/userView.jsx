@@ -18,8 +18,10 @@ const UserView = () => {
     module: "",
     shift: "",
     po: "",
+    cpoNumber: "",
     size: "",
     status: "",
+    style: "",
     type: "",
     date: "",
     id: "",
@@ -252,17 +254,30 @@ const UserView = () => {
             </div>
 
             <div className="col-span-1">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Search PO
-              </label>
-              <input
-                type="text"
-                className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                value={filters.po}
-                onChange={(e) => handleFilterChange("po", e.target.value)}
-                placeholder="Enter PO number"
-              />
-            </div>
+  <label className="block text-sm font-medium text-gray-700 mb-1">
+    Search CPO Number
+  </label>
+  <input
+    type="text"
+    className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+    value={filters.cpoNumber}
+    onChange={(e) => handleFilterChange("cpoNumber", e.target.value)}
+    placeholder="Enter CPO number"
+  />
+</div>
+
+<div className="col-span-1">
+  <label className="block text-sm font-medium text-gray-700 mb-1">
+    Search Style
+  </label>
+  <input
+    type="text"
+    className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+    value={filters.style}
+    onChange={(e) => handleFilterChange("style", e.target.value)}
+    placeholder="Enter style number"
+  />
+</div>
 
             <Dropdown
               label="Plant"
@@ -369,9 +384,10 @@ const UserView = () => {
                         
                         {/* PO/Style combined column */}
                         <td className="px-3 py-2 text-sm text-gray-500">
-                          <div className="font-medium text-gray-900">{record.PO}</div>
-                          <div className="text-xs text-gray-500">{record.Style}</div>
-                        </td>
+  <div className="text-xs font-medium text-blue-600">{record.CPO_Number || 'N/A'}</div>
+  <div className="font-medium text-gray-900">{record.PO}</div>
+  <div className="text-xs text-gray-500">{record.Style}</div>
+</td>
                         
                         {/* Customer/Size combined column */}
                         <td className="px-3 py-2 text-sm text-gray-500">
