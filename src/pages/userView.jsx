@@ -1,4 +1,4 @@
-// UserView.jsx with updated table UI
+// UserView.jsx with updated filter UI using radio buttons
 import React, { useState, useEffect } from 'react';
 import { motion } from "framer-motion";
 import Dropdown from "../components/Dropdown";
@@ -11,6 +11,30 @@ import FailureReport from "../components/FailureReport";
 import LoadingOverlay from "../components/LoadingOverlay";
 import axios from "axios";
 import { API_URL } from "../services/api";
+
+// Radio Button component for filter options
+const RadioGroup = ({ label, options, value, onChange, className = "" }) => {
+  return (
+    <div className={`${className}`}>
+      <label className="block text-sm font-medium text-gray-700 mb-2">{label}</label>
+      <div className="flex flex-wrap gap-3">
+        {options.map((option) => (
+          <label key={option.id} className="inline-flex items-center cursor-pointer">
+                          <input
+              type="radio"
+              className="form-radio h-4 w-4 text-[#023047] border-[#023047] focus:ring-[#023047] transition duration-150 ease-in-out"
+              name={label}
+              value={option.value}
+              checked={value === option.value}
+              onChange={() => onChange(option.value)}
+            />
+            <span className="ml-2 text-sm text-gray-700">{option.label}</span>
+          </label>
+        ))}
+      </div>
+    </div>
+  );
+};
 
 const UserView = () => {
   const [filters, setFilters] = useState({
@@ -226,7 +250,7 @@ const UserView = () => {
           View FCA Data
         </h1>
 
-        {/* Filters Card */}
+        {/* Filters Card - Updated with radio buttons */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-8">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-semibold text-gray-700">Filters</h2>
@@ -254,30 +278,30 @@ const UserView = () => {
             </div>
 
             <div className="col-span-1">
-  <label className="block text-sm font-medium text-gray-700 mb-1">
-    Search CPO Number
-  </label>
-  <input
-    type="text"
-    className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-    value={filters.cpoNumber}
-    onChange={(e) => handleFilterChange("cpoNumber", e.target.value)}
-    placeholder="Enter CPO number"
-  />
-</div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Search CPO Number
+              </label>
+              <input
+                type="text"
+                className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                value={filters.cpoNumber}
+                onChange={(e) => handleFilterChange("cpoNumber", e.target.value)}
+                placeholder="Enter CPO number"
+              />
+            </div>
 
-<div className="col-span-1">
-  <label className="block text-sm font-medium text-gray-700 mb-1">
-    Search Style
-  </label>
-  <input
-    type="text"
-    className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-    value={filters.style}
-    onChange={(e) => handleFilterChange("style", e.target.value)}
-    placeholder="Enter style number"
-  />
-</div>
+            <div className="col-span-1">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Search Style
+              </label>
+              <input
+                type="text"
+                className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                value={filters.style}
+                onChange={(e) => handleFilterChange("style", e.target.value)}
+                placeholder="Enter style number"
+              />
+            </div>
 
             <Dropdown
               label="Plant"
@@ -303,47 +327,49 @@ const UserView = () => {
               onChange={(value) => handleFilterChange("customer", value)}
               className="bg-white"
             />
-
-            <Dropdown
-              label="Type"
-              options={[
-                { id: "", label: "All", value: "" },
-                { id: "inline", label: "Inline", value: "inline" },
-                { id: "endline", label: "Endline", value: "endline" },
-              ]}
-              value={filters.type}
-              onChange={(value) => handleFilterChange("type", value)}
-              className="bg-white"
-            />
-
-            {/* Third Party / Internal Filter */}
-            <Dropdown
-              label="Inspection Source"
-              options={[
-                { id: "", label: "All", value: "" },
-                { id: "true", label: "Third Party", value: "true" },
-                { id: "false", label: "Internal", value: "false" },
-              ]}
-              value={filters.isThirdParty}
-              onChange={(value) => handleFilterChange("isThirdParty", value)}
-              className="bg-white"
-            />
             
-            <Dropdown
-              label="Status"
-              options={[
-                { id: "", label: "All", value: "" },
-                { id: "pass", label: "Pass", value: "pass" },
-                { id: "fail", label: "Fail", value: "fail" },
-              ]}
-              value={filters.status}
-              onChange={(value) => handleFilterChange("status", value)}
-              className="bg-white"
-            />
+            {/* Radio button groups for Type, Inspection Source, and Status (to save space) */}
+            <div className="col-span-3 grid grid-cols-1 md:grid-cols-3 gap-4 mt-2">
+              <RadioGroup
+                label="Type"
+                className='font-medium '
+                options={[
+                  { id: "", label: "All", value: "" },
+                  { id: "inline", label: "Inline", value: "inline" },
+                  { id: "endline", label: "Endline", value: "endline" },
+                ]}
+                value={filters.type}
+                onChange={(value) => handleFilterChange("type", value)}
+              />
+
+              <RadioGroup
+                label="Inspection Source"
+                className='font-medium'
+                options={[
+                  { id: "", label: "All", value: "" },
+                  { id: "true", label: "Third Party", value: "true" },
+                  { id: "false", label: "Internal", value: "false" },
+                ]}
+                value={filters.isThirdParty}
+                onChange={(value) => handleFilterChange("isThirdParty", value)}
+              />
+              
+              <RadioGroup
+                label="Status"
+                className='font-medium'
+                options={[
+                  { id: "", label: "All", value: "" },
+                  { id: "pass", label: "Pass", value: "pass" },
+                  { id: "fail", label: "Fail", value: "fail" },
+                ]}
+                value={filters.status}
+                onChange={(value) => handleFilterChange("status", value)}
+              />
+            </div>
           </div>
         </div>
 
-        {/* Data Table Card - Updated for more compact display */}
+        {/* Data Table Card - Unchanged from original */}
         <div className="bg-white rounded-lg shadow-md">
           {loading ? (
             <div className="text-center py-8">
@@ -378,16 +404,14 @@ const UserView = () => {
                         <td className="px-3 py-2 text-sm text-gray-500">
                           <div className="font-medium text-gray-900">{record.Plant}</div>
                           <div className="text-xs text-gray-500">{record.Module}   Shift:{record.Shift}</div>
-                          
-
                         </td>
                         
                         {/* PO/Style combined column */}
                         <td className="px-3 py-2 text-sm text-gray-500">
-  <div className="text-xs font-medium text-blue-600">{record.CPO_Number || 'N/A'}</div>
-  <div className="font-medium text-gray-900">{record.PO}</div>
-  <div className="text-xs text-gray-500">{record.Style}</div>
-</td>
+                          <div className="text-xs font-medium text-blue-600">{record.CPO_Number || 'N/A'}</div>
+                          <div className="font-medium text-gray-900">{record.PO}</div>
+                          <div className="text-xs text-gray-500">{record.Style}</div>
+                        </td>
                         
                         {/* Customer/Size combined column */}
                         <td className="px-3 py-2 text-sm text-gray-500">
@@ -427,7 +451,7 @@ const UserView = () => {
                           {formatDate(record.SubmissionDate)}
                         </td>
                         
-                        {/* Created By column (Added as requested) */}
+                        {/* Created By column */}
                         <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-500">
                           {record.CreatedBy || "N/A"}
                         </td>
