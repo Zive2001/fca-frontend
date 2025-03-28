@@ -21,6 +21,7 @@
     "framer-motion": "^11.11.17",
     "heroicons": "^2.2.0",
     "html2canvas": "^1.4.1",
+    "lucide-react": "^0.484.0",
     "multer": "^1.4.5-lts.1",
     "react": "^18.3.1",
     "react-datepicker": "^8.1.0",
