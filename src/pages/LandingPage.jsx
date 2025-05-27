@@ -204,10 +204,3 @@ const LandingPage = () => {
 
 export default LandingPage;
 
-
-<div> 
-
-  <p className=" *:first-letter:text-Gray text -sm  font-bold items inline-flex">
-    
-  </p>
-</div>
