@@ -33,9 +33,9 @@ const App = () => {
         <Route 
           path="/admin" 
           element={
-            <ProtectedRoute>
+            
               <AdminLanding />
-            </ProtectedRoute>
+            
           } 
         />
         <Route 
@@ -56,11 +56,23 @@ const App = () => {
           } 
         />
         <Route 
-          path="/add-Data" 
-          element={<AddData />
-            // <ProtectedRoute>
-            //   <AddData />
-            // </ProtectedRoute>
+          path="/add-master-data" 
+          element={
+            <ProtectedRoute>
+              <AddData />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/add-other-data" 
+          element={
+            <Route>
+              {/* TODO: Create AddOtherData component */}
+              <div className="min-h-screen bg-gray-900 text-white p-8">
+                <h1 className="text-3xl font-bold">Add Other Data</h1>
+                <p className="mt-4">This page is under construction.</p>
+              </div>
+            </Route>
           } 
         />
         <Route path="/home" element={<Home />} />

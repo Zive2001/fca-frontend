@@ -24,7 +24,7 @@ const AdminLanding = () => {
       </header>
 
       {/* Admin Options Section */}
-      <section className="max-w-4xl mx-auto px-4 py-20">
+      <section className="max-w-6xl mx-auto px-4 py-20">
         <motion.h1
           className="text-4xl font-bold text-center mb-12"
           initial={{ opacity: 0, y: -20 }}
@@ -34,8 +34,8 @@ const AdminLanding = () => {
           Admin Dashboard
         </motion.h1>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {/* Add Data Button */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          {/* Add Master Data Button */}
           <motion.div
             whileHover={{ scale: 1.05 }}
             className="bg-gray-800 rounded-xl p-6 shadow-lg"
@@ -44,7 +44,7 @@ const AdminLanding = () => {
             transition={{ duration: 0.5, delay: 0.1 }}
           >
             <Link
-              to="/add-Data"
+              to="/add-master-data"
               className="block text-center"
             >
               <div className="bg-[#0096c7] rounded-lg p-4 mb-4">
@@ -63,8 +63,41 @@ const AdminLanding = () => {
                   />
                 </svg>
               </div>
-              <h2 className="text-xl font-semibold mb-2">Add Data</h2>
+              <h2 className="text-xl font-semibold mb-2">Add Master Data</h2>
               <p className="text-gray-400">Add Weekly Line Plan</p>
+            </Link>
+          </motion.div>
+
+          {/* Add Other Data Button */}
+          <motion.div
+            whileHover={{ scale: 1.05 }}
+            className="bg-gray-800 rounded-xl p-6 shadow-lg"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
+            <Link
+              to="/add-other-data"
+              className="block text-center"
+            >
+              <div className="bg-[#2a9d8f] rounded-lg p-4 mb-4">
+                <svg
+                  className="w-12 h-12 mx-auto text-white"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                  />
+                </svg>
+              </div>
+              <h2 className="text-xl font-semibold mb-2">Add Other Data</h2>
+              <p className="text-gray-400">Add new categories,defect codes </p>
             </Link>
           </motion.div>
 
@@ -74,7 +107,7 @@ const AdminLanding = () => {
             className="bg-gray-800 rounded-xl p-6 shadow-lg"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
           >
             <Link
               to="/view-audits"
@@ -101,13 +134,13 @@ const AdminLanding = () => {
             </Link>
           </motion.div>
 
-          {/* Add Emails Button - Now Active */}
+          {/* Manage Admins Button */}
           <motion.div
             whileHover={{ scale: 1.05 }}
             className="bg-gray-800 rounded-xl p-6 shadow-lg"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
           >
             <Link
               to="/admin/email-management"
