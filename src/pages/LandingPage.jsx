@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import { ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline';
 
 const LandingPage = () => {
   const [userEmail, setUserEmail] = useState(null);
@@ -19,6 +20,12 @@ const LandingPage = () => {
 
   const toggleMobileMenu = () => {
     setMobileMenuOpen(!mobileMenuOpen);
+  };
+
+  const handleLogout = () => {
+    // Azure App Service logout endpoint
+    window.location.href = '/.auth/logout?post_logout_redirect_uri=' + 
+      encodeURIComponent(window.location.origin);
   };
 
   return (
@@ -65,6 +72,18 @@ const LandingPage = () => {
               <li><Link to="/admin" className="hover:text-blue-500">Admin</Link></li>
             </ul>
           </nav>
+          
+          {/* Desktop Logout Button */}
+          {userEmail && (
+            <button
+              onClick={handleLogout}
+              className="inline-flex items-center px-3 py-2 border border-gray-600 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-300 bg-gray-800 hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors duration-200"
+              title="Logout"
+            >
+              <ArrowRightOnRectangleIcon className="h-4 w-4 mr-2" />
+              Logout
+            </button>
+          )}
         </div>
 
         {/* Mobile Navigation - Overlay menu */}
@@ -76,6 +95,19 @@ const LandingPage = () => {
                 <li><Link to="/view-data" className="block py-2 hover:text-blue-500" onClick={toggleMobileMenu}>View Data</Link></li>
                 <li><Link to="/Analytics" className="block py-2 hover:text-blue-500" onClick={toggleMobileMenu}>Dashboard</Link></li>
                 <li><Link to="/admin" className="block py-2 hover:text-blue-500" onClick={toggleMobileMenu}>Admin</Link></li>
+                
+                {/* Mobile Logout Button */}
+                {userEmail && (
+                  <li className="border-t border-gray-700 pt-3">
+                    <button
+                      onClick={handleLogout}
+                      className="flex items-center w-full py-2 text-left text-red-400 hover:text-red-300 transition-colors duration-200"
+                    >
+                      <ArrowRightOnRectangleIcon className="h-4 w-4 mr-2" />
+                      Logout
+                    </button>
+                  </li>
+                )}
               </ul>
             </nav>
           </div>
@@ -186,21 +218,20 @@ const LandingPage = () => {
       </motion.section>
 
       {/* Footer */}
-         <footer className="mt-16 py-4 bg-gray-800 text-center flex items-center justify-between     px-8">
-  <div className="flex items-center">
-    <img 
-      src="/MAS White.png" 
-      alt="FCA App Logo" 
-      className="h-10 w-auto"
-    />
-  </div>
-  <p className="text-white text-sm font-semibold items-center">
-    © {new Date().getFullYear()} FCA App. Bodyline Digital Excellence.
-  </p>
-</footer>
+      <footer className="mt-16 py-4 bg-gray-800 text-center flex items-center justify-between px-8">
+        <div className="flex items-center">
+          <img 
+            src="/MAS White.png" 
+            alt="FCA App Logo" 
+            className="h-10 w-auto"
+          />
+        </div>
+        <p className="text-white text-sm font-semibold items-center">
+          © {new Date().getFullYear()} FCA App. Bodyline Digital Excellence.
+        </p>
+      </footer>
     </div>
   );
 };
 
 export default LandingPage;
-
