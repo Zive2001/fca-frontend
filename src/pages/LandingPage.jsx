@@ -368,10 +368,10 @@ Welcome to the FCA platform. Click on get started for the guide.
                         <img 
                           src="/in.svg" 
                           alt="FCA Inline"
-                          className="w-20 h-20 object-cover rounded-2xl opacity-100 group-hover:opacity-0 transition-opacity duration-300"
+                          className="w-20 h-20 object-cover rounded-2xl opacity-100  transition-opacity duration-300"
                         />
                         {/* Icon appears on hover */}
-                        <ChartBarIcon className="w-16 h-16 text-white absolute opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                      {/*  <ChartBarIcon className="w-16 h-16 text-white absolute opacity-0 group-hover:opacity-100 transition-opacity duration-300" /> */}
                       </div>
                       <div className="absolute -top-2 -right-2 w-6 h-6 bg-emerald-400 rounded-full animate-pulse" />
                     </motion.div>
@@ -430,10 +430,10 @@ Welcome to the FCA platform. Click on get started for the guide.
                         <img 
                           src="/end2.svg" 
                           alt="FCA Endline"
-                          className="w-20 h-20 object-cover rounded-2xl opacity-100 group-hover:opacity-0 transition-opacity duration-300"
+                          className="w-20 h-20 object-cover rounded-2xl opacity-100  transition-opacity duration-300"
                         />
                         {/* Icon appears on hover */}
-                        <DocumentCheckIcon className="w-16 h-16 text-white absolute opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                      {/*   <DocumentCheckIcon className="w-16 h-16 text-white absolute opacity-0 group-hover:opacity-100 transition-opacity duration-300" /> */}
                       </div>
                       <div className="absolute -top-2 -right-2 w-6 h-6 bg-yellow-400 rounded-full animate-pulse" />
                     </motion.div>
