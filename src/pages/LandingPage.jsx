@@ -253,7 +253,7 @@ const LandingPage = () => {
                       onClick={handleLogout}
                       className="flex items-center w-full px-4 py-3 text-red-400 hover:text-red-300 hover:bg-red-400/10 rounded-lg transition-all duration-300"
                     >
-                      <ArrowRightOnRectangleIcon className="h-4 w-4 mr-2" />
+                      {/* <ArrowRightOnRectangleIcon className="h-4 w-4 mr-2" /> */}
                       Logout
                     </button>
                   </motion.div>
